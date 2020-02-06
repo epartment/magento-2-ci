@@ -1,6 +1,6 @@
 FROM php:7.4-cli
 RUN apt-get update && apt-get install -q -y libicu-dev libpng-dev
-RUN docker-php-ext-install gd pdo_mysql intl bcmath zip mysqli
+RUN docker-php-ext-install gd pdo_mysql intl bcmath zip mysqli sockets
 RUN curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/local/bin --filename=composer
 RUN curl -sL https://deb.nodesource.com/setup_8.x | bash - && apt-get install -y nodejs
 RUN curl -sS https://dl.yarnpkg.com/debian/pubkey.gpg | apt-key add -

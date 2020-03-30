@@ -15,3 +15,4 @@ RUN docker-php-ext-install soap xsl pcntl
 RUN which ssh-agent || ( apt-get update -y && apt-get install openssh-client -y )
 RUN export PATH=$PATH:/usr/bin
 RUN which rsync || ( apt-get update -y && apt-get install rsync -y )
+RUN composer global require hirak/prestissimo

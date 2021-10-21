@@ -1,4 +1,4 @@
-FROM php:7.4-cli
+FROM php:8.0-cli
 RUN apt-get update && apt-get install -q -y libicu-dev libpng-dev libzip-dev
 RUN docker-php-ext-install gd pdo_mysql intl bcmath zip mysqli sockets
 RUN curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/local/bin --filename=composer
@@ -15,4 +15,3 @@ RUN docker-php-ext-install soap xsl pcntl
 RUN which ssh-agent || ( apt-get update -y && apt-get install openssh-client -y )
 RUN export PATH=$PATH:/usr/bin
 RUN which rsync || ( apt-get update -y && apt-get install rsync -y )
-RUN composer global require hirak/prestissimo

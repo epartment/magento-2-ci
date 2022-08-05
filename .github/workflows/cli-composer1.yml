@@ -6,7 +6,7 @@ on:
     paths:
       - .trigger
       - .github/workflows/cli-composer1.yml
-      - cli-loaders/**
+      - cli-1/**
     branches: [ "master" ]
 
 jobs:
@@ -45,7 +45,7 @@ jobs:
       - name: Build and push
         uses: docker/build-push-action@v3
         with:
-          context: cli-loaders
+          context: cli-1
           platforms: linux/amd64,linux/arm64
           build-args: PHP_VERSION=${{ matrix.version }}
           push: ${{ github.ref == 'refs/heads/master' && !env.ACT }}

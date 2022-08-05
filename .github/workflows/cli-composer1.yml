@@ -1,0 +1,48 @@
+name: PHP CLI With composer 1
+on:
+  schedule:
+    - cron: "0 6 1 * *" # 6 AM UTC on 1st day of month
+  push:
+    paths:
+      - .trigger
+      - .github/workflows/cli-composer1.yml
+      - cli-loaders/**
+    branches: [ "master" ]
+
+jobs:
+  cli:
+    name: Build PHP images
+    runs-on: ubuntu-latest
+
+    strategy:
+      fail-fast: false
+      matrix:
+        version:
+          - "7.2"
+          - "7.3"
+          - "7.4"
+          - "8.0"
+          - "8.1"
+          - "8.2"
+
+    steps:
+      - run: sudo chown runner:docker /var/run/docker.sock
+        if: ${{ env.ACT }}
+
+      - uses: actions/checkout@v2
+      - uses: docker/setup-qemu-action@v1
+      - uses: docker/setup-buildx-action@v1
+
+      - uses: docker/login-action@v2
+        with:
+          username: ${{ secrets.DOCKER_USERNAME }}
+          password: ${{ secrets.DOCKER_PASSWORD }}
+        if: ${{ !env.ACT }}
+
+      - uses: docker/build-push-action@v2
+        with:
+          context: cli-loaders
+          platforms: linux/amd64,linux/arm64
+          build-args: PHP_VERSION=${{ matrix.version }}
+          push: ${{ github.ref == 'refs/heads/master' && !env.ACT }}
+          tags: docker.io/epartment/magento-2-ci:${{ matrix.version }}-loaders

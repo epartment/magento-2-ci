@@ -4,9 +4,11 @@ FROM php:${PHP_VERSION}
 RUN set -eux; \
     apt-get update -y; \
     apt-get upgrade -y; \
+    apt-get install -q -y libicu-dev libpng-dev libzip-dev rsync openssh-client zip unzip libmcrypt-dev libxml2-dev libxslt-dev git gnupg2; \
     curl -sS https://dl.yarnpkg.com/debian/pubkey.gpg | apt-key add -; \
     echo "deb https://dl.yarnpkg.com/debian/ stable main" | tee /etc/apt/sources.list.d/yarn.list; \
-    apt-get install -q -y libicu-dev libpng-dev libzip-dev rsync openssh-client zip unzip yarn libmcrypt-dev libxml2-dev libxslt-dev git;
+    apt-get update -y; \
+    apt-get install -q -y yarn;
 
 
 RUN docker-php-ext-install gd pdo_mysql intl bcmath zip mysqli sockets soap xsl pcntl

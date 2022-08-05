@@ -9,14 +9,14 @@ RUN set -eux; \
     echo "deb https://dl.yarnpkg.com/debian/ stable main" | tee /etc/apt/sources.list.d/yarn.list; \
     apt-get update -y; \
     apt-get install -q -y yarn; \
-    mkdir -p ~/.composer;
+    mkdir -p /root/.composer;
 
 
 RUN docker-php-ext-install gd pdo_mysql intl bcmath zip mysqli sockets soap xsl pcntl
 RUN curl -sL https://deb.nodesource.com/setup_14.x | bash - && apt-get install -y nodejs
 
 ENV COMPOSER_ALLOW_SUPERUSER 1
-ENV COMPOSER_HOME /tmp/composer
+ENV COMPOSER_HOME /root/.composer
 COPY --from=composer:2 /usr/bin/composer /usr/bin/composer
 
 RUN export PATH=$PATH:/usr/bin

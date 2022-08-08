@@ -18,12 +18,6 @@ jobs:
       fail-fast: false
       matrix:
         version:
-          - from: "7.1-cli-buster"
-            tag: "7.1"
-          - from: "7.2-cli-buster"
-            tag: "7.2"
-          - from: "7.3-cli-bullseye"
-            tag: "7.3"
           - from: "7.4-cli-bullseye"
             tag: "7.4"
           - from: "8.0-cli-bullseye"

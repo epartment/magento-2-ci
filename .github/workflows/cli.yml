@@ -24,7 +24,7 @@ jobs:
             tag: "8.0"
           - from: "8.1-cli-bullseye"
             tag: "8.1"
-          - from: "8.2-rc-cli-buster"
+          - from: "8.2-cli-buster"
             tag: "8.2"
 
     steps:

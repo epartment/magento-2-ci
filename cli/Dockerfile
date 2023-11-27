@@ -1,5 +1,5 @@
 ARG PHP_VERSION
-FROM php:8.1-cli-bullseye
+FROM php:$PHP_VERSION
 
 ARG NODE_MAJOR
 

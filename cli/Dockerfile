@@ -1,6 +1,7 @@
 ARG PHP_VERSION
-ARG NODE_MAJOR=20
 FROM php:$PHP_VERSION
+
+ARG NODE_MAJOR
 
 RUN set -eux; \
     apt-get update -y; \

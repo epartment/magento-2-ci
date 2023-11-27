@@ -1,5 +1,6 @@
 ARG PHP_VERSION
-FROM php:8.1
+ARG NODE_MAJOR=20
+FROM php:$PHP_VERSION
 
 RUN set -eux; \
     apt-get update -y; \
@@ -11,9 +12,29 @@ RUN set -eux; \
     apt-get install -q -y yarn; \
     mkdir -p /root/.composer;
 
+# PHP Extension Installer
+ADD https://github.com/mlocati/docker-php-extension-installer/releases/latest/download/install-php-extensions /usr/local/bin/
 
-RUN docker-php-ext-install gd pdo_mysql intl bcmath zip mysqli sockets soap xsl pcntl
-RUN curl -sL https://deb.nodesource.com/setup_14.x | bash - && apt-get install -y nodejs
+RUN chmod +x /usr/local/bin/install-php-extensions && install-php-extensions \
+    gd \
+    pdo_mysql \
+    intl \
+    bcmath \
+    zip  \
+    mysqli  \
+    sockets  \
+    soap  \
+    xsl  \
+    pcntl
+
+RUN set -eux; \
+    apt-get update; \
+   apt-get install -y ca-certificates curl gnupg; \
+    mkdir -p /etc/apt/keyrings; \
+    curl -fsSL https://deb.nodesource.com/gpgkey/nodesource-repo.gpg.key | gpg --dearmor -o /etc/apt/keyrings/nodesource.gpg; \
+    echo "deb [signed-by=/etc/apt/keyrings/nodesource.gpg] https://deb.nodesource.com/node_$NODE_MAJOR.x nodistro main" | tee /etc/apt/sources.list.d/nodesource.list; \
+    apt-get update; \
+    apt-get install nodejs npm -y
 
 ENV COMPOSER_ALLOW_SUPERUSER 1
 ENV COMPOSER_HOME /root/.composer

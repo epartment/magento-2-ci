@@ -1,10 +1,10 @@
 ARG PHP_VERSION
-FROM php:${PHP_VERSION}
+FROM php:8.1
 
 RUN set -eux; \
     apt-get update -y; \
     apt-get upgrade -y; \
-    apt-get install -q -y libicu-dev libpng-dev libzip-dev rsync openssh-client zip unzip libmcrypt-dev libxml2-dev libxslt-dev git gnupg2; \
+    apt-get install -q -y libicu-dev libpng-dev libzip-dev rsync openssh-client zip unzip libmcrypt-dev libxml2-dev libxslt-dev git gnupg2 libfontconfig1 fontconfig libfontconfig1-dev libfontconfig; \
     curl -sS https://dl.yarnpkg.com/debian/pubkey.gpg | apt-key add -; \
     echo "deb https://dl.yarnpkg.com/debian/ stable main" | tee /etc/apt/sources.list.d/yarn.list; \
     apt-get update -y; \

@@ -21,7 +21,6 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        node_version: 14
         version:
           - from: "7.4-cli-bullseye"
             tag: "7.4"

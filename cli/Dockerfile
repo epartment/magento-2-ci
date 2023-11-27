@@ -4,7 +4,7 @@ FROM php:$PHP_VERSION
 ARG NODE_MAJOR
 
 # Copy PhantomJS
-COPY --from=rollupdev/phantomjs:latest /usr/local/bin/phantomjs /usr/local/bin/phantomjs
+COPY --from=rollupdev/phantomjs:latest /build/phantomjs/bin/phantomjs /usr/local/bin/phantomjs
 
 RUN set -eux; \
     apt-get update -y; \

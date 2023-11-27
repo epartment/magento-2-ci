@@ -54,6 +54,6 @@ jobs:
         with:
           context: cli
           platforms: linux/amd64,linux/arm64,linux/arm64/v8
-          build-args: PHP_VERSION=${{ matrix.version.from }} NODE_MAJOR=${{env.GLOBAL_NODE_VERSION}}
+          build-args: PHP_VERSION=${{ matrix.version.from }},NODE_MAJOR=${{env.GLOBAL_NODE_VERSION}}
           push: ${{ github.ref == 'refs/heads/master' && !env.ACT }}
           tags: docker.io/epartment/magento-2-ci:${{ matrix.version.tag }}

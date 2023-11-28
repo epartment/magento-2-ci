@@ -5,6 +5,9 @@ FROM ${ENV_SOURCE_IMAGE:-php}:${PHP_VERSION}-cli-${OS_RELEASE:-bullseye}
 USER root
 ARG PHP_VERSION
 
+# Similar issue with other node commands : https://github.com/ariya/phantomjs/issues/15449
+ENV OPENSSL_CONF=/etc/ssl/
+
 # Install helpful utilities
 RUN set -eux; \
     mkdir -p /root/.composer; \

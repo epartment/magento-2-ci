@@ -31,8 +31,6 @@ RUN ln -s /usr/local/bin/node /usr/local/bin/nodejs \
     && ln -s /opt/yarn/bin/yarn /usr/local/bin/yarn \
     && ln -s /opt/yarn/bin/yarnpkg /usr/local/bin/yarnpkg
 
-
-RUN npm config set prefix /usr/local/lib/node_modules
 ENV PATH="${PATH}:/usr/local/lib/node_modules/bin"
 
 # Copy Yarn

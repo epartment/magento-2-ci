@@ -76,6 +76,67 @@ This example shows a simple build stage that runs Composer install, Yarn install
 
 Remember to adjust the commands according to your project's needs.
 
+## Updating PHP and Node.js Versions in CI Workflows
+
+### Introduction
+
+Our CI workflows are configured to support multiple versions of PHP and Node.js. To ensure flexibility and up-to-date testing environments, these versions can be updated or extended as needed.
+
+### File Location
+
+The versions are defined in the `constants.php` file located at `.github/workflows/php-matrix/constants.php`.
+
+### Editing Instructions
+
+1. **Open `constants.php`**: Locate and open the `constants.php` file in your preferred code editor.
+
+2. **Update PHP Versions**:
+    - **Add New PHP Versions**: Append new versions to the `PHP_VERSIONS` array.
+    - **Update Latest PHP Version**: Modify `PHP_LATEST` if adding a newer version.
+    - **Specify OS Release**: Add the corresponding OS release for the new PHP version in `PHP_VERSIONS_OS_RELEASE`.
+
+3. **Update Node.js Versions**:
+    - **Add New Node.js Versions**: Append new versions to the `NODE_VERSIONS` array.
+    - **Update Latest Node.js Version**: Adjust `NODE_LATEST` if adding a newer version.
+    - **Specify OS Release**: Add the corresponding OS release for the new Node.js version in `NODE_VERSIONS_OS_RELEASE`.
+
+4. **Handle Experimental/Non-Stable Versions**: For experimental or unstable versions, especially for PHP, add them to `EXPERIMENTAL_PHP_VERSIONS` or `NOT_STABLE_XDEBUG_PHP_VERSIONS`.
+
+5. **Save and Commit**: After editing, save the file, commit, and push your changes to the repository.
+
+6. **Test Your Changes**: Ensure GitHub Actions workflows function correctly with the new versions.
+
+7. **Documentation**: Update any related documentation to reflect the new supported versions.
+
+### Example
+
+Here is an example of how to add PHP 8.3 and Node.js 22:
+
+```php
+<?php
+
+const PHP_LATEST = '8.3';
+const PHP_VERSIONS = ['7.1', '7.2', '7.3', '7.4', '8.0', '8.1', '8.2', '8.3'];
+const PHP_VERSIONS_OS_RELEASE = [
+    // existing entries
+    '8.3' => 'bookworm', // Replace with the correct OS release for PHP 8.3
+];
+
+const NODE_LATEST = '22';
+const NODE_VERSIONS = ['10', '12', '13', '14', '15', '16', '17', '18', '19', '20', '21', '22'];
+const NODE_VERSIONS_OS_RELEASE = [
+    // existing entries
+    '22' => 'bookworm', // Replace with the correct OS release for Node.js 22
+];
+
+const EXPERIMENTAL_PHP_VERSIONS = [];
+const NOT_STABLE_XDEBUG_PHP_VERSIONS = ['7.0', '7.1', '7.2', '7.3', '7.4'];
+```
+
+### Note
+
+When adding new versions, ensure the corresponding OS release is accurate. These releases are key for the correct functioning of the CI workflows.
+
 Please note that this image is specifically tailored for GitLab CI usage and may not work as expected outside of the GitLab CI environment.
 
 I hope this helps! Let me know if you have any further questions.

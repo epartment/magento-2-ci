@@ -9,7 +9,7 @@ on:
       - node/Dockerfile
       - composer1/Dockerfile
       - Dockerfile
-      - .github/workflows/*imageci*
+      - .github/workflows/imageci.yml
       - .github/workflows/php-matrix/**
     branches:
       - master

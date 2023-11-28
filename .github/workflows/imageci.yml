@@ -1,4 +1,4 @@
-name: Docker Image PHP-CLI
+name: Gitlab CI PHP + Composer + Node + Yarn + NPM + Other
 on:
   schedule:
     - cron: "0 6 * * *"   # 6 AM daily
@@ -182,7 +182,7 @@ jobs:
             ENV_SOURCE_IMAGE= docker.io/epartment/gitlab-ci
             PHP_VERSION=${{ matrix.php_version }}-node${{ matrix.node_version }}
           push: ${{ github.ref == 'refs/heads/master' && !env.ACT }}
-          tags:  docker.io/epartment/gitlab-ci-wordpress:${{ matrix.php_version }}-node${{ matrix.node_version }}-composer1
+          tags:  docker.io/epartment/gitlab-ci-composer1:${{ matrix.php_version }}-node${{ matrix.node_version }}-composer1
 
       - uses: docker/build-push-action@v4
         if: ${{ matrix.node_version=='x' }}

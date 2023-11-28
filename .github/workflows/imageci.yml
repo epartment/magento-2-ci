@@ -1,13 +1,15 @@
 name: Gitlab CI PHP + Composer + Node + Yarn + NPM + Other
 on:
   schedule:
-    - cron: "0 6 * * *"   # 6 AM daily
+    - cron: "0 1 1 * *"   # 01 AM on first day of the month
   pull_request:
   push:
     paths:
       - .trigger
-      - php-cli/**
-      - .github/workflows/*php-cli*
+      - node/Dockerfile
+      - composer1/Dockerfile
+      - Dockerfile
+      - .github/workflows/*imageci*
       - .github/workflows/php-matrix/**
     branches:
       - master

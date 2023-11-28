@@ -32,6 +32,7 @@ RUN ln -s /usr/local/bin/node /usr/local/bin/nodejs \
     && ln -s /opt/yarn/bin/yarnpkg /usr/local/bin/yarnpkg
 
 ENV PATH="${PATH}:/usr/local/lib/node_modules/bin"
+ENV NODE_PATH="/usr/local/lib/node_modules"
 
 # Copy Yarn
 COPY --from=node /opt /opt

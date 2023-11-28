@@ -89,7 +89,7 @@ jobs:
             OS_RELEASE=${{ matrix.php_os_release }}
             ENV_SOURCE_IMAGE=php
           push: ${{ github.ref == 'refs/heads/master' && !env.ACT }}
-          tags:  docker.io/epartment/gitlab-ci:${{ matrix.php_version }}
+          tags: docker.io/epartment/gitlab-ci:${{ matrix.php_version }}
 
       - uses: docker/build-push-action@v4
         if: ${{ matrix.latest }}
@@ -101,7 +101,7 @@ jobs:
             OS_RELEASE=${{ matrix.php_os_release }}
             ENV_SOURCE_IMAGE=php
           push: ${{ github.ref == 'refs/heads/master' && !env.ACT }}
-          tags:  docker.io/epartment/gitlab-ci:latest
+          tags: docker.io/epartment/gitlab-ci:latest
 
   php-node:
     name: PHP-CLI ${{ matrix.php_version }} + Node ${{ matrix.node_version }}
@@ -131,12 +131,12 @@ jobs:
           context: node
           platforms: linux/amd64,linux/arm64
           build-args: |
-            ENV_SOURCE_IMAGE= docker.io/epartment/gitlab-ci
+            ENV_SOURCE_IMAGE=docker.io/epartment/gitlab-ci
             PHP_VERSION=${{ matrix.php_version }}
             NODE_VERSION=${{ matrix.node_version }}
             OS_RELEASE=${{ matrix.node_os_release }}
           push: ${{ github.ref == 'refs/heads/master' && !env.ACT }}
-          tags:  docker.io/epartment/gitlab-ci:${{ matrix.php_version }}-node${{ matrix.node_version }}
+          tags: docker.io/epartment/gitlab-ci:${{ matrix.php_version }}-node${{ matrix.node_version }}
 
       - uses: docker/build-push-action@v4
         if: ${{ matrix.latest }}
@@ -144,12 +144,12 @@ jobs:
           context: node
           platforms: linux/amd64,linux/arm64
           build-args: |
-            ENV_SOURCE_IMAGE= docker.io/epartment/gitlab-ci
+            ENV_SOURCE_IMAGE=docker.io/epartment/gitlab-ci
             PHP_VERSION=${{ matrix.php_version }}
             NODE_VERSION=${{ matrix.node_version }}
             OS_RELEASE=${{ matrix.node_os_release }}
           push: ${{ github.ref == 'refs/heads/master' && !env.ACT }}
-          tags:  docker.io/epartment/gitlab-ci:latest-nodelatest
+          tags: docker.io/epartment/gitlab-ci:latest-nodelatest
 
   composer1:
     name: PHP-CLI + Composer1 ${{ matrix.php_version }} - Node ${{ matrix.node_version }}
@@ -181,10 +181,10 @@ jobs:
           context: composer1
           platforms: linux/amd64,linux/arm64
           build-args: |
-            ENV_SOURCE_IMAGE= docker.io/epartment/gitlab-ci
+            ENV_SOURCE_IMAGE=docker.io/epartment/gitlab-ci
             PHP_VERSION=${{ matrix.php_version }}-node${{ matrix.node_version }}
           push: ${{ github.ref == 'refs/heads/master' && !env.ACT }}
-          tags:  docker.io/epartment/gitlab-ci-composer1:${{ matrix.php_version }}-node${{ matrix.node_version }}
+          tags: docker.io/epartment/gitlab-ci-composer1:${{ matrix.php_version }}-node${{ matrix.node_version }}
 
       - uses: docker/build-push-action@v4
         if: ${{ matrix.node_version=='x' }}
@@ -192,10 +192,10 @@ jobs:
           context: composer1
           platforms: linux/amd64,linux/arm64
           build-args: |
-            ENV_SOURCE_IMAGE= docker.io/epartment/gitlab-ci
+            ENV_SOURCE_IMAGE=docker.io/epartment/gitlab-ci
             PHP_VERSION=${{ matrix.php_version }}
           push: ${{ github.ref == 'refs/heads/master' && !env.ACT }}
-          tags:  docker.io/epartment/gitlab-ci-composer1:${{ matrix.php_version }}
+          tags: docker.io/epartment/gitlab-ci-composer1:${{ matrix.php_version }}
 
       - uses: docker/build-push-action@v4
         if: ${{ matrix.node_version!='x' && matrix.latest }}
@@ -203,10 +203,10 @@ jobs:
           context: composer1
           platforms: linux/amd64,linux/arm64
           build-args: |
-            ENV_SOURCE_IMAGE= docker.io/epartment/gitlab-ci
+            ENV_SOURCE_IMAGE=docker.io/epartment/gitlab-ci
             PHP_VERSION=${{ matrix.php_version }}-node${{ matrix.node_version }}
           push: ${{ github.ref == 'refs/heads/master' && !env.ACT }}
-          tags:  docker.io/epartment/gitlab-ci-composer1:latest-nodelatest
+          tags: docker.io/epartment/gitlab-ci-composer1:latest-nodelatest
 
 
       - uses: docker/build-push-action@v4
@@ -215,8 +215,8 @@ jobs:
           context: composer1
           platforms: linux/amd64,linux/arm64
           build-args: |
-            ENV_SOURCE_IMAGE= docker.io/epartment/gitlab-ci
+            ENV_SOURCE_IMAGE=docker.io/epartment/gitlab-ci
             PHP_VERSION=${{ matrix.php_version }}
           push: ${{ github.ref == 'refs/heads/master' && !env.ACT }}
-          tags:  docker.io/epartment/gitlab-ci-composer1:latest
+          tags: docker.io/epartment/gitlab-ci-composer1:latest
 

@@ -73,6 +73,7 @@ jobs:
         with:
           driver-opts: |
             image=moby/buildkit:v0.10.6
+
       - name: Login to DockerHub
         uses: docker/login-action@v3
         with:
@@ -90,6 +91,8 @@ jobs:
             ENV_SOURCE_IMAGE=php
           push: ${{ github.ref == 'refs/heads/master' && !env.ACT }}
           tags: docker.io/epartment/gitlab-ci:${{ matrix.php_version }}
+          cache-from: type=registry,ref=docker.io/epartment/gitlab-ci:${{ matrix.php_version }}-buildcache
+          cache-to: type=registry,ref=docker.io/epartment/gitlab-ci:${{ matrix.php_version }}-buildcache,mode=max
 
       - uses: docker/build-push-action@v4
         if: ${{ matrix.latest }}
@@ -102,6 +105,8 @@ jobs:
             ENV_SOURCE_IMAGE=php
           push: ${{ github.ref == 'refs/heads/master' && !env.ACT }}
           tags: docker.io/epartment/gitlab-ci:latest
+          cache-from: type=registry,ref=docker.io/epartment/gitlab-ci:latest-buildcache
+          cache-to: type=registry,ref=docker.io/epartment/gitlab-ci:latest-buildcache,mode=max
 
   php-node:
     name: PHP-CLI ${{ matrix.php_version }} + Node ${{ matrix.node_version }}
@@ -137,6 +142,8 @@ jobs:
             OS_RELEASE=${{ matrix.node_os_release }}
           push: ${{ github.ref == 'refs/heads/master' && !env.ACT }}
           tags: docker.io/epartment/gitlab-ci:${{ matrix.php_version }}-node${{ matrix.node_version }}
+          cache-from: type=registry,ref=docker.io/epartment/gitlab-ci:${{ matrix.php_version }}-node${{ matrix.node_version }}-buildcache
+          cache-to: type=registry,ref=docker.io/epartment/gitlab-ci:${{ matrix.php_version }}-node${{ matrix.node_version }}-buildcache,mode=max
 
       - uses: docker/build-push-action@v4
         if: ${{ matrix.latest }}
@@ -150,6 +157,8 @@ jobs:
             OS_RELEASE=${{ matrix.node_os_release }}
           push: ${{ github.ref == 'refs/heads/master' && !env.ACT }}
           tags: docker.io/epartment/gitlab-ci:latest-nodelatest
+          cache-from: type=registry,ref=docker.io/epartment/gitlab-ci:latest-nodelatest-buildcache
+          cache-to: type=registry,ref=docker.io/epartment/gitlab-ci:latest-nodelatest-buildcache,mode=max
 
   composer1:
     name: PHP-CLI + Composer1 ${{ matrix.php_version }} - Node ${{ matrix.node_version }}
@@ -185,6 +194,8 @@ jobs:
             PHP_VERSION=${{ matrix.php_version }}-node${{ matrix.node_version }}
           push: ${{ github.ref == 'refs/heads/master' && !env.ACT }}
           tags: docker.io/epartment/gitlab-ci-composer1:${{ matrix.php_version }}-node${{ matrix.node_version }}
+          cache-from: type=registry,ref=docker.io/epartment/gitlab-ci-composer1:${{ matrix.php_version }}-node${{ matrix.node_version }}-buildcache
+          cache-to: type=registry,ref=docker.io/epartment/gitlab-ci-composer1:${{ matrix.php_version }}-node${{ matrix.node_version }}-buildcache,mode=max
 
       - uses: docker/build-push-action@v4
         if: ${{ matrix.node_version=='x' }}
@@ -196,6 +207,8 @@ jobs:
             PHP_VERSION=${{ matrix.php_version }}
           push: ${{ github.ref == 'refs/heads/master' && !env.ACT }}
           tags: docker.io/epartment/gitlab-ci-composer1:${{ matrix.php_version }}
+          cache-from: type=registry,ref=docker.io/epartment/gitlab-ci-composer1:${{ matrix.php_version }}-buildcache
+          cache-to: type=registry,ref=docker.io/epartment/gitlab-ci-composer1:${{ matrix.php_version }}-buildcache,mode=max
 
       - uses: docker/build-push-action@v4
         if: ${{ matrix.node_version!='x' && matrix.latest }}
@@ -207,7 +220,8 @@ jobs:
             PHP_VERSION=${{ matrix.php_version }}-node${{ matrix.node_version }}
           push: ${{ github.ref == 'refs/heads/master' && !env.ACT }}
           tags: docker.io/epartment/gitlab-ci-composer1:latest-nodelatest
-
+          cache-from: type=registry,ref=docker.io/epartment/gitlab-ci-composer1:latest-nodelatest-buildcache
+          cache-to: type=registry,ref=docker.io/epartment/gitlab-ci-composer1:latest-nodelatest-buildcache,mode=max
 
       - uses: docker/build-push-action@v4
         if: ${{ matrix.node_version=='x' && matrix.latest }}
@@ -219,4 +233,5 @@ jobs:
             PHP_VERSION=${{ matrix.php_version }}
           push: ${{ github.ref == 'refs/heads/master' && !env.ACT }}
           tags: docker.io/epartment/gitlab-ci-composer1:latest
-
+          cache-from: type=registry,ref=docker.io/epartment/gitlab-ci-composer1:latest-buildcache
+          cache-to: type=registry,ref=docker.io/epartment/gitlab-ci-composer1:latest-buildcache,mode=max

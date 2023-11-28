@@ -4,7 +4,7 @@ ARG OS_RELEASE
 ARG NODE_VERSION
 
 FROM node:${NODE_VERSION}-${OS_RELEASE:-bullseye} AS node
-RUN npm install -g grunt-cli gulp
+RUN npm install -g grunt-cli gulp puppeteer requirejs terser
 RUN mv /opt/yarn* /opt/yarn
 
 FROM ${ENV_SOURCE_IMAGE}:${PHP_VERSION}
@@ -21,6 +21,10 @@ COPY --from=99designs/phantomjs:2.1.1 /usr/local/bin/phantomjs /usr/local/bin/ph
 
 RUN ln -s /usr/local/bin/node /usr/local/bin/nodejs \
     && ln -s /usr/local/lib/node_modules/npm/bin/npm-cli.js /usr/local/bin/npm \
+    && ln -s /usr/local/lib/node_modules/requirejs/bin/r.js /usr/local/bin/requirejs \
+    && ln -s /usr/local/lib/node_modules/requirejs/bin/r.js /usr/local/bin/r.js \
+    && ln -s /usr/local/lib/node_modules/terser/bin/terser /usr/local/bin/terser \
+    && ln -s /usr/local/lib/node_modules/terser/bin/uglifyjs /usr/local/bin/uglifyjs \
     && ln -s /usr/local/lib/node_modules/gulp/bin/gulp.js /usr/local/bin/gulp \
     && ln -s /usr/local/lib/node_modules/grunt-cli/bin/grunt /usr/local/bin/grunt \
     && ln -s /usr/local/lib/node_modules/npm/bin/npx-cli.js /usr/local/bin/npx \

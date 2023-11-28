@@ -26,10 +26,27 @@ RUN set -eux; \
     libxslt-dev \
     git \
     gnupg2 \
-    libfontconfig1 \
     fontconfig \
+    libfontconfig1  \
     libfontconfig1-dev \
-    libfontconfig
+    libfontconfig \
+    libnss3  \
+    libatk1.0-0  \
+    libatk-bridge2.0-0  \
+    libc6  \
+    libcairo2  \
+    libgdk-pixbuf2.0-0  \
+    libglib2.0-0  \
+    libgtk-3-0  \
+    fonts-liberation  \
+    ca-certificates  \
+    libnss3  \
+    lsb-release  \
+    xdg-utils  \
+    libgbm1  \
+    libasound2
+
+
 
 # PHP Extension Installer
 ADD https://github.com/mlocati/docker-php-extension-installer/releases/latest/download/install-php-extensions /usr/local/bin/

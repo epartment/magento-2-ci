@@ -21,15 +21,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        version:
-          - from: "7.4-cli-bullseye"
-            tag: "7.4"
-          - from: "8.0-cli-bullseye"
-            tag: "8.0"
-          - from: "8.1-cli-bullseye"
-            tag: "8.1"
-          - from: "8.2-cli-buster"
-            tag: "8.2"
+
 
     steps:
 

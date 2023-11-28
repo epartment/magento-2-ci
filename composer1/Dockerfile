@@ -1,5 +1,7 @@
 ARG PHP_VERSION
-FROM epartment/magento-2-ci:${PHP_VERSION}
+ARG OS_RELEASE
+FROM ${ENV_SOURCE_IMAGE}:${PHP_VERSION}
+USER root
 
 RUN rm /usr/bin/composer
 

@@ -184,7 +184,7 @@ jobs:
             ENV_SOURCE_IMAGE= docker.io/epartment/gitlab-ci
             PHP_VERSION=${{ matrix.php_version }}-node${{ matrix.node_version }}
           push: ${{ github.ref == 'refs/heads/master' && !env.ACT }}
-          tags:  docker.io/epartment/gitlab-ci:${{ matrix.php_version }}-node${{ matrix.node_version }}-composer1
+          tags:  docker.io/epartment/gitlab-ci-composer1:${{ matrix.php_version }}-node${{ matrix.node_version }}
 
       - uses: docker/build-push-action@v4
         if: ${{ matrix.node_version=='x' }}
@@ -195,7 +195,7 @@ jobs:
             ENV_SOURCE_IMAGE= docker.io/epartment/gitlab-ci
             PHP_VERSION=${{ matrix.php_version }}
           push: ${{ github.ref == 'refs/heads/master' && !env.ACT }}
-          tags:  docker.io/epartment/gitlab-ci:${{ matrix.php_version }}-composer1
+          tags:  docker.io/epartment/gitlab-ci-composer1:${{ matrix.php_version }}
 
       - uses: docker/build-push-action@v4
         if: ${{ matrix.node_version!='x' && matrix.latest }}
@@ -206,7 +206,7 @@ jobs:
             ENV_SOURCE_IMAGE= docker.io/epartment/gitlab-ci
             PHP_VERSION=${{ matrix.php_version }}-node${{ matrix.node_version }}
           push: ${{ github.ref == 'refs/heads/master' && !env.ACT }}
-          tags:  docker.io/epartment/gitlab-ci:latest-nodelatest-composer1
+          tags:  docker.io/epartment/gitlab-ci-composer1:latest-nodelatest
 
 
       - uses: docker/build-push-action@v4
@@ -218,5 +218,5 @@ jobs:
             ENV_SOURCE_IMAGE= docker.io/epartment/gitlab-ci
             PHP_VERSION=${{ matrix.php_version }}
           push: ${{ github.ref == 'refs/heads/master' && !env.ACT }}
-          tags:  docker.io/epartment/gitlab-ci:latest-composer1
+          tags:  docker.io/epartment/gitlab-ci-composer1:latest
 

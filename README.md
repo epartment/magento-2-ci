@@ -9,8 +9,6 @@ This Docker image contains:
 - Node.js
 - NPM
 - Yarn
-- Grunt
-- Gulp
 - PhantomJS
 
 It has the following PHP extensions installed:
@@ -35,6 +33,13 @@ It has the following PHP extensions installed:
 - ZIP
 - Mcrypt (for PHP < 8.2)
 
+The following Node modules are preinstalled with this image:
+- Gulp
+- Grunt CLI
+- Puppeteer
+- RequireJS (r.js)
+- Terser
+- UglifyJS
 
 To use this image, you can specify the image tag in your  `.gitlab-ci.yml`  file. Here's an example:
 

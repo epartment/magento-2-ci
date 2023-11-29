@@ -1,4 +1,4 @@
-# Using the Docker Image in GitLab CI
+# Gitlab Ci Pipeline Image With and Without NodeJS
 
 This Docker image is designed to be used in GitLab CI pipelines. It contains the necessary tools and dependencies for building and testing your project.
 
@@ -42,6 +42,15 @@ The following Node modules are preinstalled with this image:
 - UglifyJS
 
 To use this image, you can specify the image tag in your  `.gitlab-ci.yml`  file. Here's an example:
+
+## Using this Docker Image in GitLab CI
+
+### Determining Node.js Version
+
+If you are uncertain about the Node.js version used for generating packages:
+- **Check `package-lock.json`**: Look for the `"@types/node"` package in your `package-lock.json`. This can give you an indication of the Node.js version used.
+- **If Absent in `package-lock.json`**: Check the `.env.roll` local stack configuration for the Node.js version.
+- **Default Assumption**: If neither is present, it's likely Node.js 14 was used, as this was the only version installed in the old GitLab CI image.
 
 ### Composer 2
 image: `epartment/gitlab-ci:<tag>`

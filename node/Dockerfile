@@ -17,7 +17,7 @@ COPY --from=node /opt /opt
 COPY --from=node /usr/local/bin/node /usr/local/bin/node
 
 # Copy PhantomJS
-COPY --from=99designs/phantomjs:2.1.1 /usr/local/bin/phantomjs /usr/local/bin/phantomjs
+COPY --from=rollupdev/phantomjs:latest /usr/local/bin/phantomjs /usr/local/bin/phantomjs
 
 RUN ln -s /usr/local/bin/node /usr/local/bin/nodejs \
     && ln -s /usr/local/lib/node_modules/npm/bin/npm-cli.js /usr/local/bin/npm \
@@ -34,4 +34,5 @@ RUN ln -s /usr/local/bin/node /usr/local/bin/nodejs \
 ENV PATH="${PATH}:/usr/local/lib/node_modules/bin"
 ENV NODE_PATH="/usr/local/lib/node_modules"
 
+# Ensure that puppeteer chrome build is downloaded correctly.
 RUN npm -g install puppeteer

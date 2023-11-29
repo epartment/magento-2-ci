@@ -17,7 +17,7 @@ COPY --from=node /opt /opt
 COPY --from=node /usr/local/bin/node /usr/local/bin/node
 
 # Copy PhantomJS
-COPY --from=rollupdev/phantomjs:latest /usr/local/bin/phantomjs /usr/local/bin/phantomjs
+COPY --from=rollupdev/phantomjs:latest /build/phantomjs/bin/phantomjs /usr/local/bin/phantomjs
 
 RUN ln -s /usr/local/bin/node /usr/local/bin/nodejs \
     && ln -s /usr/local/lib/node_modules/npm/bin/npm-cli.js /usr/local/bin/npm \

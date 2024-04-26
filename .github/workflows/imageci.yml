@@ -10,7 +10,7 @@ on:
       - composer1/Dockerfile
       - Dockerfile
       - .github/workflows/imageci.yml
-      - .github/workflows/php-matrix/**
+      - .github/workflows/php-matrix/*.php
     branches:
       - master
 

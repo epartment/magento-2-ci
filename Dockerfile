@@ -46,7 +46,18 @@ RUN set -eux; \
     libgbm1  \
     libasound2
 
+# If PHP = 7.0 | debs are archived so use those
+RUN if [ "${PHP_VERSION}" = "7.0" ]; \
+    then printf "deb http://archive.debian.org/debian/ stretch main\ndeb-src http://archive.debian.org/debian/ stretch main" > /etc/apt/sources.list; \
+    apt-get update -y; \
+    apt-get install -y --no-install-recommends \
+    python \
+    python-pip; fi
 
+# If PHP >= 7.1
+RUN if [ "$(printf "7.1\n${PHP_VERSION}" | sort -g | head -n1 | awk -F"." '{print $1"."$2}')" = "7.1" ]; \
+    then apt-get install -y --no-install-recommends python3 python3-pip python2; \
+    if [ ! -f "/usr/bin/pip" ]; then ln -s /usr/bin/pip3 /usr/bin/pip; ln -s /usr/bin/python3 /usr/bin/python; fi; fi
 
 # PHP Extension Installer
 ADD https://github.com/mlocati/docker-php-extension-installer/releases/latest/download/install-php-extensions /usr/local/bin/

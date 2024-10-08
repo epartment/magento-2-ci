@@ -27,23 +27,24 @@ RUN set -eux; \
     git \
     gnupg2 \
     fontconfig \
-    libfontconfig1  \
+    libfontconfig1 \
     libfontconfig1-dev \
     libfontconfig \
-    libnss3  \
-    libatk1.0-0  \
-    libatk-bridge2.0-0  \
-    libc6  \
-    libcairo2  \
-    libgdk-pixbuf2.0-0  \
-    libglib2.0-0  \
-    libgtk-3-0  \
-    fonts-liberation  \
-    ca-certificates  \
-    libnss3  \
-    lsb-release  \
-    xdg-utils  \
-    libgbm1  \
+    libnss3 \
+    libatk1.0-0 \
+    libatk-bridge2.0-0 \
+    libc6 \
+    libcairo2 \
+    libgdk-pixbuf2.0-0 \
+    libglib2.0-0 \
+    libgtk-3-0 \
+    fonts-liberation \
+    ca-certificates \
+    libnss3 \
+    lsb-release \
+    xdg-utils \
+    libgbm1 \
+    libx11-xcb1 \
     libasound2
 
 # If PHP = 7.0 | debs are archived so use those

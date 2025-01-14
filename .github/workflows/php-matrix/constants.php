@@ -29,12 +29,12 @@ const NODE_VERSIONS_OS_RELEASE = [
 ];
 
 const NODE_VERSIONS_OS_RELEASE_ALPINE = [
-    '16' => '23-alpine.3.20',
-    '18' => '23-alpine.3.20',
-    '19' => '23-alpine.3.20',
-    '20' => '23-alpine.3.20',
-    '21' => '23-alpine.3.20',
-    '22' => '23-alpine.3.20',
+    '16' => 'alpine3.20',
+    '18' => 'alpine3.20',
+    '19' => 'alpine3.20',
+    '20' => 'alpine3.20',
+    '21' => 'alpine3.20',
+    '22' => 'alpine3.20',
 ];
 
 const EXPERIMENTAL_PHP_VERSIONS = [];

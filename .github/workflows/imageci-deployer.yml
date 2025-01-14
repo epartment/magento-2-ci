@@ -41,7 +41,6 @@ jobs:
 
       - uses: docker/build-push-action@v5
         with:
-          context: ci-deployer
           platforms: linux/amd64,linux/arm64
           build-args: DEPLOYER_VERSION=${{ matrix.version }}
           push: ${{ github.ref == 'refs/heads/master' && !env.ACT }}

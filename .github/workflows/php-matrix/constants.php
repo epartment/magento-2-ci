@@ -19,19 +19,22 @@ const PHP_VERSIONS_OS_RELEASE = [
     '8.3' => 'bookworm'
 ];
 const NODE_LATEST = '21';
-const NODE_VERSIONS = ['18', '19', '20', '21'];
+const NODE_VERSIONS = ['18', '19', '20', '21', '22'];
 const NODE_VERSIONS_OS_RELEASE = [
     '18' => 'bullseye',
     '19' => 'bullseye',
     '20' => 'bookworm',
     '21' => 'bookworm',
+    '22' => 'bookworm',
 ];
 
 const NODE_VERSIONS_OS_RELEASE_ALPINE = [
+    '16' => '23-alpine.3.20',
     '18' => '23-alpine.3.20',
     '19' => '23-alpine.3.20',
     '20' => '23-alpine.3.20',
     '21' => '23-alpine.3.20',
+    '22' => '23-alpine.3.20',
 ];
 
 const EXPERIMENTAL_PHP_VERSIONS = [];

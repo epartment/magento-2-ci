@@ -19,7 +19,7 @@ const PHP_VERSIONS_OS_RELEASE = [
     '8.3' => 'bookworm'
 ];
 const NODE_LATEST = '21';
-const NODE_VERSIONS = ['18', '19', '20', '21', '22'];
+const NODE_VERSIONS = ['16', '18', '19', '20', '21', '22'];
 const NODE_VERSIONS_OS_RELEASE = [
     '18' => 'bullseye',
     '19' => 'bullseye',

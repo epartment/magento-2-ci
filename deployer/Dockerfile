@@ -1,11 +1,11 @@
 ARG OS_RELEASE
 ARG NODE_VERSION
+ARG DEPLOYER_VERSION
 
 FROM node:${NODE_VERSION}-${OS_RELEASE:-bullseye} AS node
 RUN npm install -g grunt-cli gulp puppeteer requirejs terser penthouse
 RUN mv /opt/yarn* /opt/yarn
 
-ARG DEPLOYER_VERSION
 FROM deployphp/deployer:${DEPLOYER_VERSION}
 
 # Copy Node to Deployer

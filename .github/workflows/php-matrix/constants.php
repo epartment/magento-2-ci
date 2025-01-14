@@ -32,3 +32,7 @@ const NODE_VERSIONS_OS_RELEASE = [
 ];
 const EXPERIMENTAL_PHP_VERSIONS = [];
 const NOT_STABLE_XDEBUG_PHP_VERSIONS = ['7.0', '7.1', '7.2', '7.3', '7.4'];
+
+const DEPLOYER_LATEST = 'v7';
+
+const DEPLOYER_VERSIONS = ['v7'];

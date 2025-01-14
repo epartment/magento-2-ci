@@ -27,5 +27,5 @@ RUN ln -s /usr/local/bin/node /usr/local/bin/nodejs \
     && ln -s /opt/yarn/bin/yarnpkg /usr/local/bin/yarnpkg \
     && ln -s /usr/local/lib/node_modules/puppeteer/lib/esm/puppeteer/node/cli.js /usr/local/bin/puppeteer
 
-ENV PATH="${PATH}:/usr/local/lib/node_modules/bin"
+ENV PATH="${PATH}:/usr/local/bin:/usr/local/lib/node_modules/bin"
 ENV NODE_PATH="/usr/local/lib/node_modules"

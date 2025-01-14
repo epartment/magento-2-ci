@@ -10,7 +10,7 @@ on:
       - deployer/Dockerfile
       - .github/workflows/imageci-deployer.yml
 jobs:
-  ci-depolyer:
+  ci-deployer:
     name: Gitlab CI Deployer
     runs-on: ubuntu-latest
 

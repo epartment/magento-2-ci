@@ -9,6 +9,8 @@ on:
       - .trigger
       - deployer/Dockerfile
       - .github/workflows/imageci-deployer.yml
+      - .github/workflows/php-matrix/deployer-generator.php
+      - .github/workflows/php-matrix/constants.php
 jobs:
   deployer-matrix:
     name: Generate Base Deployer-Node Matrix

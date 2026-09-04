@@ -4,6 +4,8 @@ on:
   schedule:
     - cron: "0 3 1 * *"   # 03 AM on first day of the month
   pull_request:
+    branches:
+      - master
   push:
     paths:
       - .trigger
@@ -11,6 +13,8 @@ on:
       - .github/workflows/imageci-bundling.yml
       - .github/workflows/php-matrix/bundling-generator.php
       - .github/workflows/php-matrix/constants.php
+    branches:
+      - master
 jobs:
   bundling-matrix:
     name: Generate Bundling-Node Matrix

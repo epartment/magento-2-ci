@@ -4,6 +4,8 @@ on:
   schedule:
     - cron: "0 1 1 * *"   # 01 AM on first day of the month
   pull_request:
+    branches:
+      - master
   push:
     paths:
       - .trigger

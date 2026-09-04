@@ -7,8 +7,9 @@ Node and Deployer versions.
 
 > **Pushing to `master` publishes to Docker Hub.** Every workflow here has
 > `push: github.ref == 'refs/heads/master'`, so a merge rebuilds and overwrites the public tags that
-> every client pipeline pulls. Pushes to any other branch build the images without publishing them,
-> which is the way to test a change.
+> every client pipeline pulls. Every workflow is also *triggered* only by `master`: a push to any
+> other branch runs nothing at all. Open a pull request against `master` to get a build — that runs
+> the workflows without publishing, and is the way to test a change.
 
 ## Contents
 
@@ -41,8 +42,9 @@ Upstream bases: `php:<version>-cli-<debian>`, `node:<version>-<debian|alpine>`,
 
 There is nothing to install. Everything builds through Docker.
 
-Build one image locally the way CI does — the build args are not optional, and a missing one produces
-an invalid base image name:
+Since a feature-branch push triggers no workflow, building locally is the first-line check. Build
+one image the way CI does — the build args are not optional, and a missing one produces an invalid
+base image name:
 
 ```bash
 docker build --build-arg PHP_VERSION=8.3 --build-arg OS_RELEASE=bookworm --build-arg ENV_SOURCE_IMAGE=php -t test:php83 .
@@ -215,7 +217,11 @@ the clearest case of an image being picked for one ingredient and carrying twent
 
 There is one environment: GitHub Actions building on `ubuntu-latest`, publishing to Docker Hub.
 
-- Pushes to `master` publish. Everything else builds without pushing, including pull requests.
+- Workflows trigger only on `master`: `push` and `pull_request` are both filtered to that branch,
+  so pushing a feature branch runs nothing. A pull request targeting `master` builds without
+  publishing — that is the pre-merge check.
+- Publishing is gated separately, on `github.ref == 'refs/heads/master'`, so even a manual
+  `workflow_dispatch` from another branch builds without overwriting a public tag.
 - Each workflow also runs on a monthly `schedule`, staggered by an hour, to pick up upstream base
   image patches. See [H1](#high) — those schedules are currently not firing.
 - Multi-arch builds use QEMU, so an arm64 build is emulated and considerably slower than amd64.
@@ -283,7 +289,7 @@ openssl rand -hex 32 > .trigger
 | Chrome exits immediately in a container | Missing shared libraries, or the sandbox. | Check the library list in `bundling/Dockerfile`; pass `--no-sandbox` when running as root. |
 | A Node binary copied into an Alpine image fails to start | The PHP Alpine base does not ship `libstdc++`. | `apk add --no-cache libstdc++`. Do not copy the node image's `/usr/lib` over the base's. |
 | Images on Docker Hub are months old although a monthly schedule exists | GitHub disables scheduled workflows after 60 days without repository activity. | Re-enable them in the Actions tab; see [H1](#high). |
-| A workflow ran on a branch but published nothing | Intended: `push:` is gated on `refs/heads/master`. | Merge to `master`. |
+| Pushing a branch runs no workflow at all | Intended: `push` and `pull_request` are filtered to `master`. | Open a pull request against `master`, or build locally. |
 | `no match for platform in manifest` when pulling | The tag was built amd64-only. | Rebuild with `platforms: linux/amd64,linux/arm64`. |
 
 ## Known issues & improvement points

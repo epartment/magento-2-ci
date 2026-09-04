@@ -18,8 +18,10 @@ live client pipelines pull on their next deploy. There is no staging registry an
 Consequences:
 
 - Treat an edit to any Dockerfile as a change to every project's CI, and say so when proposing one.
-- Work on a branch. Branch pushes and pull requests build the images without pushing them, which is
-  the only safe way to test.
+- Work on a branch, but note that a branch push triggers no workflow at all: `push` and
+  `pull_request` are both filtered to `master`. Build locally, then open a pull request against
+  `master` — a PR build runs the workflows without publishing, and is the only automated check
+  before a merge that publishes.
 - Never change what an existing version tag means. `8.3-node22` is PHP 8.3 with Node 22, forever.
   Only the floating aliases (`latest`, `latest-nodelatest`, `deployer-latest-nodelatest`,
   `bundling-nodelatest`) may move.
@@ -106,7 +108,10 @@ docker buildx imagetools inspect epartment/gitlab-ci:deployer-v7
 
 - Default branch is `master`, and merging to it publishes. Branch off it for everything.
 - `feature/<slug>` for changes.
-- A branch push still runs the workflows, in build-only mode. Use that as the test.
+- **A feature-branch push triggers nothing.** All three workflows filter `push` and `pull_request`
+  to `master`, so branch pushes run no CI at all. Build locally (see "Verify by building" above),
+  then open a pull request against `master` — a PR build runs the workflows without publishing, and
+  is the only automated pre-merge check there is.
 
 ## Documentation
 

@@ -1,19 +1,19 @@
-name: Gitlab CI Deployer
+name: Gitlab CI Bundling
 on:
   workflow_dispatch:
   schedule:
-    - cron: "0 2 1 * *"   # 01 AM on first day of the month
+    - cron: "0 3 1 * *"   # 03 AM on first day of the month
   pull_request:
   push:
     paths:
       - .trigger
-      - deployer/Dockerfile
-      - .github/workflows/imageci-deployer.yml
-      - .github/workflows/php-matrix/deployer-generator.php
+      - bundling/Dockerfile
+      - .github/workflows/imageci-bundling.yml
+      - .github/workflows/php-matrix/bundling-generator.php
       - .github/workflows/php-matrix/constants.php
 jobs:
-  deployer-matrix:
-    name: Generate Base Deployer-Node Matrix
+  bundling-matrix:
+    name: Generate Bundling-Node Matrix
     runs-on: ubuntu-latest
     outputs:
       matrix: ${{ steps.matrix.outputs.matrix }}
@@ -24,17 +24,17 @@ jobs:
           php-version: 8.3
       - id: matrix
         run: |
-          php .github/workflows/php-matrix/deployer-generator.php >> $GITHUB_OUTPUT
+          php .github/workflows/php-matrix/bundling-generator.php >> $GITHUB_OUTPUT
       - run: echo "Matrix:\n";echo '${{ steps.matrix.outputs.matrix }}'
 
-  ci-deployer:
-    name: Gitlab CI Deployer + Node ${{ matrix.node_version }}
+  ci-bundling:
+    name: Gitlab CI Bundling + Node ${{ matrix.node_version }}
     runs-on: ubuntu-latest
-    needs: deployer-matrix
+    needs: bundling-matrix
     strategy:
       fail-fast: false
       max-parallel: ${{ github.ref == 'refs/heads/master' && 6 || 0 }}
-      matrix: ${{fromJson(needs.deployer-matrix.outputs.matrix)}}
+      matrix: ${{fromJson(needs.bundling-matrix.outputs.matrix)}}
     steps:
       - uses: actions/checkout@v4
       - uses: docker/setup-qemu-action@v3
@@ -49,29 +49,27 @@ jobs:
 
       - uses: docker/build-push-action@v5
         with:
-          context: deployer
+          context: bundling
           platforms: linux/amd64,linux/arm64
           build-args: |
-            DEPLOYER_VERSION=${{ matrix.deployer_version }}
             NODE_VERSION=${{ matrix.node_version }}
             OS_RELEASE=${{ matrix.node_os_release }}
 
           push: ${{ github.ref == 'refs/heads/master' && !env.ACT }}
-          tags: docker.io/${{ github.repository_owner }}/gitlab-ci:deployer-${{ matrix.deployer_version }}-node${{ matrix.node_version }}
-          cache-from: type=registry,ref=docker.io/epartment/gitlab-ci:deployer-${{ matrix.deployer_version }}-node${{ matrix.node_version }}-buildcache
-          cache-to: type=registry,ref=docker.io/epartment/gitlab-ci:deployer-${{ matrix.deployer_version }}-node${{ matrix.node_version }}-buildcache,mode=max
+          tags: docker.io/${{ github.repository_owner }}/gitlab-ci:bundling-node${{ matrix.node_version }}
+          cache-from: type=registry,ref=docker.io/epartment/gitlab-ci:bundling-node${{ matrix.node_version }}-buildcache
+          cache-to: type=registry,ref=docker.io/epartment/gitlab-ci:bundling-node${{ matrix.node_version }}-buildcache,mode=max
 
       - uses: docker/build-push-action@v5
         if: ${{ matrix.latest }}
         with:
-          context: deployer
+          context: bundling
           platforms: linux/amd64,linux/arm64
           build-args: |
-            DEPLOYER_VERSION=${{ matrix.deployer_version }}
             NODE_VERSION=${{ matrix.node_version }}
             OS_RELEASE=${{ matrix.node_os_release }}
 
           push: ${{ github.ref == 'refs/heads/master' && !env.ACT }}
-          tags: docker.io/${{ github.repository_owner }}/gitlab-ci:deployer-latest-nodelatest
-          cache-from: type=registry,ref=docker.io/epartment/gitlab-ci:deployer-latest-nodelatest-buildcache
-          cache-to: type=registry,ref=docker.io/epartment/gitlab-ci:deployer-latest-nodelatest-buildcache,mode=max
+          tags: docker.io/${{ github.repository_owner }}/gitlab-ci:bundling-nodelatest
+          cache-from: type=registry,ref=docker.io/epartment/gitlab-ci:bundling-nodelatest-buildcache
+          cache-to: type=registry,ref=docker.io/epartment/gitlab-ci:bundling-nodelatest-buildcache,mode=max

@@ -41,6 +41,23 @@ const NODE_VERSIONS_OS_RELEASE_ALPINE = [
 const EXPERIMENTAL_PHP_VERSIONS = [];
 const NOT_STABLE_XDEBUG_PHP_VERSIONS = ['7.0', '7.1', '7.2', '7.3', '7.4'];
 
-const DEPLOYER_LATEST = 'v7';
+/*
+* Deployer major versions to build images for. Each value must exist as a tag
+* on docker.io/deployphp/deployer.
+*/
+const DEPLOYER_VERSIONS = ['v7', 'v8'];
+const DEPLOYER_LATEST = 'v8';
 
-const DEPLOYER_VERSIONS = ['v7'];
+/*
+* The deployer and bundling images track their own "latest" Node version, so
+* that moving it does not also move the latest-nodelatest tag of the PHP
+* images (that one follows NODE_LATEST).
+*/
+const DEPLOYER_NODE_LATEST = '22';
+
+/*
+* Node versions built for the bundling image. Puppeteer downloads a glibc
+* build of Chrome, so this image is Debian-based and uses NODE_VERSIONS_OS_RELEASE.
+*/
+const BUNDLING_NODE_VERSIONS = ['18', '20', '22'];
+const BUNDLING_NODE_LATEST = '22';

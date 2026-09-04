@@ -153,14 +153,20 @@ pipeline calling `php /bin/deployer.phar` keeps working and `dep` works too.
 ### JavaScript bundling and critical CSS — `epartment/gitlab-ci:bundling-node<node>`
 
 For the `js` and `critical-css` jobs of a Magento deploy pipeline. Contains Node, npm, a global
-Puppeteer with Chrome already installed, gulp-cli, rsync, OpenSSH, git, jq and a minimal PHP CLI.
+Puppeteer with Chrome already installed, gulp-cli, rsync, OpenSSH, git and jq.
 
 - `bundling-node22` — Node 22
 - `bundling-nodelatest` — newest supported Node
 
-It contains **no Composer, no PHP extensions, no PhantomJS and no Python**, because those jobs never
-run Magento and never install dependencies with Composer. Prefer it over a `<php>-node<node>` tag for
+It contains **no PHP, no Composer, no PhantomJS and no Python**, because those jobs never run
+Magento and never install dependencies with Composer. Prefer it over a `<php>-node<node>` tag for
 crawling and critical-CSS work.
+
+Leaving PHP out is deliberate and load-bearing. The `js` job has to read the project's
+`composer.lock` to find the locked reference of `epartment/javascript-bundling`; doing that in Node
+rather than PHP means this image never has to match the Magento project's PHP version. Shipping a
+PHP would have made that worse than useless, because `php-cli` resolves to 7.4 on bullseye and 8.2 on
+bookworm — so the PHP version would have silently tracked the *Node* version.
 
 Two notes for pipeline authors:
 
@@ -377,10 +383,17 @@ openssl rand -hex 32 > .trigger
 
 Checked during this pass and found correct.
 
-- **The bundling image builds, and Chrome actually starts in it.** Built locally for `linux/amd64`
-  and verified with a real `puppeteer.launch()`, which reported `Chrome/152.0.7977.75`, alongside
-  node 22, PHP 8.2 CLI, gulp, rsync, git and jq. It measures 333 MiB compressed (877 MiB on disk)
-  against 640 MiB compressed for the `8.3-node22` image these jobs use today.
+- **The bundling image builds, and Chrome actually starts in it.** The `node22` (bookworm) and
+  `node18` (bullseye) variants were built locally for `linux/amd64`, and verified with a real
+  `puppeteer.launch()`, which reported `Chrome/152.0.7977.75`, alongside node, gulp, rsync, git and
+  jq. It measures 329 MiB compressed (853 MiB on disk) against 640 MiB compressed for the
+  `8.3-node22` image these jobs use today.
+- **The image contains no PHP, and nothing needs it to.** `command -v php` returns nothing. The one
+  task PHP performed — reading the consuming project's `composer.lock` to find the locked reference
+  of `epartment/javascript-bundling` — was rewritten in Node and tested against a real
+  `composer.lock`, returning the expected source URL and 40-character reference with exit `0`.
+  This matters more than it looks: `php-cli` resolves to 7.4 on bullseye and 8.2 on bookworm, so a
+  PHP in this image would have silently tracked the Node version rather than the project's.
 - **The deployer image builds and works for both Deployer majors.** `deployer-v8-node22` and
   `deployer-v7-node20` were built locally for `linux/amd64` and verified to report Deployer 8.0.5 and
   7.5.12 respectively, via both `dep --version` and `php /bin/deployer.phar --version`, with

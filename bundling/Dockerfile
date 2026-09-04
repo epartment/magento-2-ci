@@ -4,7 +4,7 @@
 # pipeline. Those jobs crawl a running shop with Puppeteer, build a theme with
 # gulp, and rsync the results to the deploy target. They do NOT run Composer,
 # Magento, or any PHP application code, so this image ships none of that: no
-# Composer, no PHP extensions, no PhantomJS, no Python. That takes it to 333 MiB
+# Composer, no PHP, no PhantomJS, no Python. That takes it to about 330 MiB
 # compressed against 640 MiB for the general-purpose
 # epartment/gitlab-ci:<php>-node<node> image it replaces for these jobs.
 #
@@ -20,7 +20,10 @@
 #   gulp              the critical-CSS job runs the theme's gulp tasks
 #   rsync, ssh        moving artefacts to and from the deploy target
 #   git               the js job clones epartment/javascript-bundling by hand
-#   php-cli           one inline script that reads the project's composer.lock
+#
+# No PHP and no Composer: the one thing PHP used to do here, reading the
+# project's composer.lock, is done in node, so this image never has to match a
+# Magento project's PHP version.
 
 ARG NODE_VERSION
 ARG OS_RELEASE
@@ -41,7 +44,6 @@ RUN set -eux; \
       git \
       jq \
       openssh-client \
-      php-cli \
       rsync \
       unzip \
       fonts-liberation \
@@ -96,7 +98,6 @@ ENV NODE_PATH="/usr/local/lib/node_modules"
 RUN set -eux; \
     node --version; \
     npm --version; \
-    php --version; \
     gulp --version; \
     rsync --version | head -n 1; \
     ssh -V; \

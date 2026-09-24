@@ -33,7 +33,7 @@ Node and Deployer versions.
 | GitHub Actions | three workflows under `.github/workflows/` |
 | PHP 8.3 | runs the matrix generators inside the workflow; nothing else |
 | Docker Hub | `epartment/gitlab-ci`, `epartment/gitlab-ci-composer1` |
-| Platforms | `linux/amd64` and `linux/arm64` (deployer and bundling images; the PHP images are amd64) |
+| Platforms | `linux/amd64` and `linux/arm64` (deployer images, and the Node 22 bundling image); everything else is amd64 |
 
 Upstream bases: `php:<version>-cli-<debian>`, `node:<version>-<debian|alpine>`,
 `deployphp/deployer:<v7|v8>`, `composer:1` and `composer:2`.
@@ -106,11 +106,12 @@ which lists they cross-multiply:
 | `php-generator.php` | one entry per PHP version | `PHP_LATEST` |
 | `node-generator.php` | PHP × Node | `PHP_LATEST` and `NODE_LATEST` |
 | `full-generator.php` | PHP × Node plus a `node_version: x` row for the Node-less variant | `PHP_LATEST` and `NODE_LATEST` |
-| `deployer-generator.php` | Deployer × Node | `DEPLOYER_LATEST` and `DEPLOYER_NODE_LATEST` |
-| `bundling-generator.php` | Node only | `BUNDLING_NODE_LATEST` |
+| `deployer-generator.php` | `DEPLOYER_VERSIONS` × `DEPLOYER_NODE_VERSIONS` | `DEPLOYER_LATEST` and `DEPLOYER_NODE_LATEST` |
+| `bundling-generator.php` | Node × platform (`build_matrix`), plus one row per Node (`matrix`) for the publish job | `BUNDLING_NODE_LATEST` |
 
 The `latest` flag does not create an image. It gates a second `build-push-action` step that pushes the
-same build again under a floating alias such as `latest-nodelatest`.
+same build again under a floating alias such as `latest-nodelatest`. The bundling workflow instead
+adds the alias as a second tag when it joins the per-platform images, so nothing is rebuilt.
 
 ## Images and tags
 
@@ -135,9 +136,12 @@ Identical, with Composer 1 in place of Composer 2. Same tag shapes.
 For pipelines that deploy with Deployer. Contains the Deployer PHAR at `/bin/dep`, plus Node, npm,
 npx, yarn, gulp, grunt, RequireJS and Terser for Magento theme builds. Runs as root.
 
-- `deployer-v8-node22` — Deployer 8 with Node 22
-- `deployer-v7-node20` — Deployer 7 with Node 20
-- `deployer-latest-nodelatest` — newest supported combination
+- `deployer-v8-node22` — Deployer 8 with Node 22; the only tag the `epartment/deployer` pipeline uses
+- `deployer-latest-nodelatest` — the same build under a floating alias
+
+Only `deployer-v8-node22` is rebuilt (`DEPLOYER_VERSIONS` × `DEPLOYER_NODE_VERSIONS` in
+`constants.php`). The other `deployer-v7-node*` and `deployer-v8-node*` tags stay on Docker Hub but
+are frozen at their last build; no release of the `epartment/deployer` package references them.
 
 It deliberately contains **no browser**. Chromium, Puppeteer and penthouse were removed because the
 crawling jobs run on the bundling image below; carrying them made every deploy job pull several
@@ -157,8 +161,15 @@ pipeline calling `php /bin/deployer.phar` keeps working and `dep` works too.
 For the `js` and `critical-css` jobs of a Magento deploy pipeline. Contains Node, npm, a global
 Puppeteer with Chrome already installed, gulp-cli, rsync, OpenSSH, git and jq.
 
-- `bundling-node22` — Node 22
-- `bundling-nodelatest` — newest supported Node
+- `bundling-node22` — Node 22, `linux/amd64` and `linux/arm64`
+- `bundling-node20`, `bundling-node18` — Node 20 / 18, `linux/amd64` only
+- `bundling-nodelatest` — the same image as `bundling-node22`
+
+Every variant is built on Debian bookworm (`BUNDLING_OS_RELEASE`), whatever release the PHP + Node
+images use for that Node version. arm64 exists for Node 22 only: Puppeteer 25 requires Node >= 22.12,
+so Node 18 and 20 install Puppeteer 24, whose Chrome download for linux arm64 is the x86-64 build.
+Each platform is built on a native GitHub runner, pushed by digest, and then joined into one tag, so
+a Node version is published only when all of its platforms built.
 
 It contains **no PHP, no Composer, no PhantomJS and no Python**, because those jobs never run
 Magento and never install dependencies with Composer. Prefer it over a `<php>-node<node>` tag for
@@ -287,6 +298,9 @@ openssl rand -hex 32 > .trigger
 | A client pipeline fails with `Could not open input file: /bin/deployer.phar` | The image predates, or was built without, the compatibility symlink; upstream moved the PHAR to `/bin/dep`. | Use a `deployer-<v>-node<n>` tag built from the current Dockerfile, or call `dep` directly. |
 | `Could not find Chrome (ver. ...)` at runtime | A global `npm install -g puppeteer` does not download a browser; it only creates the cache folder. | Run `puppeteer browsers install chrome` as its own step, after clearing `PUPPETEER_CACHE_DIR`. |
 | Chrome exits immediately in a container | Missing shared libraries, or the sandbox. | Check the library list in `bundling/Dockerfile`; pass `--no-sandbox` when running as root. |
+| The bundling smoke test fails with `Timed out after waiting 30000ms` on the arm64 build only | The arm64 image was built under QEMU emulation on an amd64 runner; Chrome does not start in time there. | Build each platform on a native runner (`BUNDLING_RUNNERS`). |
+| `Dynamic loader not found: /lib64/ld-linux-x86-64.so.2` launching Chrome on arm64 | Puppeteer 24 (the newest for Node < 22.12) downloads the x86-64 Chrome on linux arm64. | Build arm64 only for Node 22 (`BUNDLING_NODE_PLATFORMS`). |
+| `apt-get install` fails with `404 Not Found` on `debian-security … +deb11u…` | Debian 11 (bullseye) LTS ended on 2026-08-31 and its security archive was purged. | Build on bookworm; for images that must stay on bullseye, point apt at `snapshot.debian.org`. |
 | A Node binary copied into an Alpine image fails to start | The PHP Alpine base does not ship `libstdc++`. | `apk add --no-cache libstdc++`. Do not copy the node image's `/usr/lib` over the base's. |
 | Images on Docker Hub are months old although a monthly schedule exists | GitHub disables scheduled workflows after 60 days without repository activity. | Re-enable them in the Actions tab; see [H1](#high). |
 | Pushing a branch runs no workflow at all | Intended: `push` and `pull_request` are filtered to `master`. | Open a pull request against `master`, or build locally. |
@@ -389,10 +403,11 @@ openssl rand -hex 32 > .trigger
 
 Checked during this pass and found correct.
 
-- **The bundling image builds, and Chrome actually starts in it.** The `node22` (bookworm) and
-  `node18` (bullseye) variants were built locally for `linux/amd64`, and verified with a real
-  `puppeteer.launch()`, which reported `Chrome/152.0.7977.75`, alongside node, gulp, rsync, git and
-  jq. It measures 329 MiB compressed (853 MiB on disk) against 640 MiB compressed for the
+- **The bundling image builds, and Chrome actually starts in it.** Every variant in the matrix was
+  built and passed the in-build `puppeteer.launch()` smoke test, alongside node, gulp, rsync, git and
+  jq: `node18` and `node20` on bookworm for `linux/amd64` (Puppeteer 24, `Chrome/148.0.7778.97`),
+  and `node22` on bookworm for `linux/amd64` in CI and `linux/arm64` on a native arm64 host
+  (`Chrome/154.0.8037.57`). It measures 329 MiB compressed (853 MiB on disk) against 640 MiB compressed for the
   `8.3-node22` image these jobs use today.
 - **The image contains no PHP, and nothing needs it to.** `command -v php` returns nothing. The one
   task PHP performed — reading the consuming project's `composer.lock` to find the locked reference

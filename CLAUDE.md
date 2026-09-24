@@ -41,7 +41,8 @@ folder it never fills; and `bookworm-slim` shipping no `unzip`, which `@puppetee
 out to. None of these produce a warning — they produce a broken image or a failed client pipeline.
 
 `deployer/Dockerfile` and `bundling/Dockerfile` therefore end with a `RUN` that executes every tool
-they claim to ship, including an actual `puppeteer.launch()`. Keep that step, and extend it whenever
+they claim to ship; in the bundling image that includes an actual `puppeteer.launch()`. Keep that
+step, and extend it whenever
 you add a tool. It is the difference between a broken build here and a broken deploy at a client.
 
 ## Invariants to preserve

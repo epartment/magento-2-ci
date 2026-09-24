@@ -15,12 +15,15 @@ on:
       - .github/workflows/php-matrix/constants.php
     branches:
       - master
+env:
+  IMAGE: docker.io/${{ github.repository_owner }}/gitlab-ci
 jobs:
   bundling-matrix:
     name: Generate Bundling-Node Matrix
     runs-on: ubuntu-latest
     outputs:
       matrix: ${{ steps.matrix.outputs.matrix }}
+      build_matrix: ${{ steps.matrix.outputs.build_matrix }}
     steps:
       - uses: actions/checkout@v4
       - uses: shivammathur/setup-php@v2
@@ -29,19 +32,22 @@ jobs:
       - id: matrix
         run: |
           php .github/workflows/php-matrix/bundling-generator.php >> $GITHUB_OUTPUT
-      - run: echo "Matrix:\n";echo '${{ steps.matrix.outputs.matrix }}'
+      - run: echo "Matrix:\n";echo '${{ steps.matrix.outputs.matrix }}';echo '${{ steps.matrix.outputs.build_matrix }}'
 
+  # One build per Node version and platform, each on a native runner: Chrome does
+  # not start under QEMU emulation, so the Dockerfile's puppeteer.launch() smoke
+  # test only passes on a native build. Each build is pushed untagged, by digest;
+  # ci-bundling-merge then assembles the multi-platform tag.
   ci-bundling:
-    name: Gitlab CI Bundling + Node ${{ matrix.node_version }}
-    runs-on: ubuntu-latest
+    name: Gitlab CI Bundling + Node ${{ matrix.node_version }} (${{ matrix.platform }})
+    runs-on: ${{ matrix.runner }}
     needs: bundling-matrix
     strategy:
       fail-fast: false
       max-parallel: ${{ github.ref == 'refs/heads/master' && 6 || 0 }}
-      matrix: ${{fromJson(needs.bundling-matrix.outputs.matrix)}}
+      matrix: ${{fromJson(needs.bundling-matrix.outputs.build_matrix)}}
     steps:
       - uses: actions/checkout@v4
-      - uses: docker/setup-qemu-action@v3
       - uses: docker/setup-buildx-action@v3
 
       - name: Login to Docker Hub
@@ -51,29 +57,81 @@ jobs:
           password: ${{ secrets.DOCKER_PASSWORD }}
         if: ${{ !env.ACT }}
 
-      - uses: docker/build-push-action@v5
+      - id: build
+        uses: docker/build-push-action@v5
         with:
           context: bundling
-          platforms: linux/amd64,linux/arm64
+          platforms: ${{ matrix.platform }}
           build-args: |
             NODE_VERSION=${{ matrix.node_version }}
             OS_RELEASE=${{ matrix.node_os_release }}
 
-          push: ${{ github.ref == 'refs/heads/master' && !env.ACT }}
-          tags: docker.io/${{ github.repository_owner }}/gitlab-ci:bundling-node${{ matrix.node_version }}
-          cache-from: type=registry,ref=docker.io/epartment/gitlab-ci:bundling-node${{ matrix.node_version }}-buildcache
-          cache-to: type=registry,ref=docker.io/epartment/gitlab-ci:bundling-node${{ matrix.node_version }}-buildcache,mode=max
+          outputs: type=image,name=${{ env.IMAGE }},push-by-digest=true,name-canonical=true,push=${{ github.ref == 'refs/heads/master' && !env.ACT }}
+          cache-from: type=registry,ref=docker.io/epartment/gitlab-ci:bundling-node${{ matrix.node_version }}-${{ matrix.platform_pair }}-buildcache
+          cache-to: type=registry,ref=docker.io/epartment/gitlab-ci:bundling-node${{ matrix.node_version }}-${{ matrix.platform_pair }}-buildcache,mode=max
 
-      - uses: docker/build-push-action@v5
-        if: ${{ matrix.latest }}
+      - name: Export digest
+        if: ${{ github.ref == 'refs/heads/master' && !env.ACT }}
+        run: |
+          mkdir -p "${{ runner.temp }}/digests"
+          digest="${{ steps.build.outputs.digest }}"
+          touch "${{ runner.temp }}/digests/${digest#sha256:}"
+
+      - name: Upload digest
+        if: ${{ github.ref == 'refs/heads/master' && !env.ACT }}
+        uses: actions/upload-artifact@v4
         with:
-          context: bundling
-          platforms: linux/amd64,linux/arm64
-          build-args: |
-            NODE_VERSION=${{ matrix.node_version }}
-            OS_RELEASE=${{ matrix.node_os_release }}
+          name: digests-node${{ matrix.node_version }}-${{ matrix.platform_pair }}
+          path: ${{ runner.temp }}/digests/*
+          if-no-files-found: error
+          retention-days: 1
 
-          push: ${{ github.ref == 'refs/heads/master' && !env.ACT }}
-          tags: docker.io/${{ github.repository_owner }}/gitlab-ci:bundling-nodelatest
-          cache-from: type=registry,ref=docker.io/epartment/gitlab-ci:bundling-nodelatest-buildcache
-          cache-to: type=registry,ref=docker.io/epartment/gitlab-ci:bundling-nodelatest-buildcache,mode=max
+  # Publishes bundling-node<version> (and bundling-nodelatest for the latest
+  # Node) as one multi-platform tag. A Node version is only published when every
+  # platform built, so a failed arm64 build cannot leave an amd64-only tag.
+  ci-bundling-merge:
+    name: Publish Bundling + Node ${{ matrix.node_version }}
+    runs-on: ubuntu-latest
+    needs: [bundling-matrix, ci-bundling]
+    if: ${{ !cancelled() && github.ref == 'refs/heads/master' }}
+    strategy:
+      fail-fast: false
+      matrix: ${{fromJson(needs.bundling-matrix.outputs.matrix)}}
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          path: ${{ runner.temp }}/digests
+          pattern: digests-node${{ matrix.node_version }}-*
+          merge-multiple: true
+
+      - uses: docker/setup-buildx-action@v3
+
+      - name: Login to Docker Hub
+        uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKER_USERNAME }}
+          password: ${{ secrets.DOCKER_PASSWORD }}
+        if: ${{ !env.ACT }}
+
+      - name: Create tag
+        if: ${{ !env.ACT }}
+        env:
+          NODE_VERSION: ${{ matrix.node_version }}
+          PLATFORM_COUNT: ${{ matrix.platform_count }}
+          LATEST: ${{ matrix.latest }}
+        run: |
+          shopt -s nullglob
+          sources=()
+          for file in "$RUNNER_TEMP"/digests/*; do
+            sources+=("$IMAGE@sha256:$(basename "$file")")
+          done
+          if [ "${#sources[@]}" -ne "$PLATFORM_COUNT" ]; then
+            echo "Expected $PLATFORM_COUNT platform digests, found ${#sources[@]}; not publishing." >&2
+            exit 1
+          fi
+          tags=(-t "$IMAGE:bundling-node$NODE_VERSION")
+          if [ "$LATEST" = "true" ]; then
+            tags+=(-t "$IMAGE:bundling-nodelatest")
+          fi
+          docker buildx imagetools create "${tags[@]}" "${sources[@]}"
+          docker buildx imagetools inspect "$IMAGE:bundling-node$NODE_VERSION"

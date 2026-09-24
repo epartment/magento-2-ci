@@ -14,6 +14,7 @@ foreach (PHP_VERSIONS as $phpVersion) {
             'php_os_release' => $phpOsRelease,
             'node_version' => $nodeVersion,
             'node_os_release' => $nodeOsRelease,
+            'puppeteer_version' => PUPPETEER_VERSIONS[$nodeVersion],
             'experimental' => $experimental,
             'latest' => $phpVersion === PHP_LATEST && $nodeVersion === NODE_LATEST,
         ];

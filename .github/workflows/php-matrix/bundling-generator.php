@@ -20,6 +20,7 @@ foreach (BUNDLING_NODE_VERSIONS as $nodeVersion) {
         $buildMatrix[] = [
             'node_version' => $nodeVersion,
             'node_os_release' => BUNDLING_OS_RELEASE,
+            'puppeteer_version' => PUPPETEER_VERSIONS[$nodeVersion],
             'platform' => $platform,
             'platform_pair' => str_replace('/', '-', $platform),
             'runner' => BUNDLING_RUNNERS[$platform],

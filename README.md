@@ -122,6 +122,12 @@ General-purpose Magento CI image: PHP with APCu, AMQP, BCMath, Calendar, Exif, G
 (PHP < 8.2), plus Composer 2. The `-node` variants add Node, NPM, Yarn, PhantomJS, Gulp, Grunt,
 Puppeteer, RequireJS, Terser and UglifyJS.
 
+The global Puppeteer is pinned per Node version (`PUPPETEER_VERSIONS` in `constants.php`): 21 on
+Node 16, 24 on Node 18–21, the latest release on Node 22. Unpinned, a rebuild installed Puppeteer 25
+on Node 16, 19 and 21, where it cannot run (`require('puppeteer')` fails with `ERR_REQUIRE_ESM`). The
+image ends with a smoke test that requires Puppeteer, runs the `puppeteer` binary and checks that its
+browser is installed.
+
 - `latest` — newest PHP, no Node
 - `latest-nodelatest` — newest PHP and Node
 - `8.3` — PHP 8.3, no Node
@@ -162,12 +168,20 @@ For the `js` and `critical-css` jobs of a Magento deploy pipeline. Contains Node
 Puppeteer with Chrome already installed, gulp-cli, rsync, OpenSSH, git and jq.
 
 - `bundling-node22` — Node 22, `linux/amd64` and `linux/arm64`
-- `bundling-node20`, `bundling-node18` — Node 20 / 18, `linux/amd64` only
+- `bundling-node20`, `bundling-node18`, `bundling-node16` — Node 20 / 18 / 16, `linux/amd64` only
 - `bundling-nodelatest` — the same image as `bundling-node22`
 
 Every variant is built on Debian bookworm (`BUNDLING_OS_RELEASE`), whatever release the PHP + Node
-images use for that Node version. arm64 exists for Node 22 only: Puppeteer 25 requires Node >= 22.12,
-so Node 18 and 20 install Puppeteer 24, whose Chrome download for linux arm64 is the x86-64 build.
+images use for that Node version. The Puppeteer major is pinned per Node version
+(`PUPPETEER_VERSIONS`, shared with the PHP + Node images): 21 on Node 16, 24 on Node 18 and 20, the
+latest release on Node 22.
+arm64 exists for Node 22 only: Puppeteer 25 requires Node >= 22.12, and the older majors' Chrome
+download for linux arm64 is the x86-64 build.
+
+Which tag a pipeline needs depends on the job. A crawler that only drives Chrome runs on any of them,
+so `bundling-nodelatest` is the safe choice. A job that installs and builds a theme (`npm clean-install`,
+`gulp build`) must use the theme's Node version, because native dependencies such as `node-sass` only
+install on the Node versions they were built for.
 Each platform is built on a native GitHub runner, pushed by digest, and then joined into one tag, so
 a Node version is published only when all of its platforms built.
 
@@ -300,6 +314,9 @@ openssl rand -hex 32 > .trigger
 | Chrome exits immediately in a container | Missing shared libraries, or the sandbox. | Check the library list in `bundling/Dockerfile`; pass `--no-sandbox` when running as root. |
 | The bundling smoke test fails with `Timed out after waiting 30000ms` on the arm64 build only | The arm64 image was built under QEMU emulation on an amd64 runner; Chrome does not start in time there. | Build each platform on a native runner (`BUNDLING_RUNNERS`). |
 | `Dynamic loader not found: /lib64/ld-linux-x86-64.so.2` launching Chrome on arm64 | Puppeteer 24 (the newest for Node < 22.12) downloads the x86-64 Chrome on linux arm64. | Build arm64 only for Node 22 (`BUNDLING_NODE_PLATFORMS`). |
+| A build, or a pipeline's `puppeteer browsers install`, hangs forever right after printing `chrome@<version> <path>` | `@puppeteer/browsers` 1.x (Puppeteer 21, Node 16) sends downloads with keep-alive and leaves a TLS socket open, so on Node 16 the process never exits although Chrome is fully installed. | Both `node/Dockerfile` and `bundling/Dockerfile` switch keep-alive off in `@puppeteer/browsers` 1.x; keep that step. |
+| `ReferenceError: ReadableStream is not defined` or `ERR_REQUIRE_ESM` from Puppeteer | An unpinned install put Puppeteer 25 (needs Node >= 22.12) on an older Node. npm 8 on Node 16 installs it with only an `EBADENGINE` warning. | Pin the Puppeteer major for that Node version in `PUPPETEER_VERSIONS`. |
+| `Could not find Chrome (ver. 121…)` although `/…/chrome/linux-121…/chrome` exists | Puppeteer 21 launches its default (old) headless mode from `chrome-headless-shell`, which `browsers install chrome` does not fetch. | Install `chrome-headless-shell` too, as both Dockerfiles do for Puppeteer 21. |
 | `apt-get install` fails with `404 Not Found` on `debian-security … +deb11u…` | Debian 11 (bullseye) LTS ended on 2026-08-31 and its security archive was purged. | Build on bookworm; for images that must stay on bullseye, point apt at `snapshot.debian.org`. |
 | A Node binary copied into an Alpine image fails to start | The PHP Alpine base does not ship `libstdc++`. | `apk add --no-cache libstdc++`. Do not copy the node image's `/usr/lib` over the base's. |
 | Images on Docker Hub are months old although a monthly schedule exists | GitHub disables scheduled workflows after 60 days without repository activity. | Re-enable them in the Actions tab; see [H1](#high). |

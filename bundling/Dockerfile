@@ -83,12 +83,37 @@ RUN set -eux; \
 # @puppeteer/browsers shells out to unzip to extract Chrome; without it the
 # install leaves an empty version folder behind and every later launch, and
 # every later install, fails on that half-written directory.
+#
+# PUPPETEER_VERSION is an npm version or dist-tag, set per Node version in
+# constants.php (PUPPETEER_VERSIONS). Unpinned, npm installs whatever is newest
+# on the day of the build, which on Node 16 is a Puppeteer that cannot run
+# there. Like the other build args it has no default.
+#
+# @puppeteer/browsers 1.x (Puppeteer 21, used on Node 16) sends its downloads
+# with keep-alive and leaves a TLS socket open afterwards; on Node 16 the
+# process then never exits, which hangs this build and the critical-CSS job's
+# own "puppeteer browsers install". Keep-alive is switched off in that version
+# only, and the grep fails the build if the patched line ever changes shape.
+# Puppeteer 21 launches old headless mode from chrome-headless-shell, so that
+# browser is installed as well.
+ARG PUPPETEER_VERSION
 ENV PUPPETEER_CACHE_DIR=/opt/puppeteer
 RUN set -eux; \
     PUPPETEER_SKIP_DOWNLOAD=true PUPPETEER_SKIP_CHROMIUM_DOWNLOAD=true \
-      npm install -g gulp-cli puppeteer; \
+      npm install -g gulp-cli "puppeteer@${PUPPETEER_VERSION}"; \
+    for pkg in $(find /usr/local/lib/node_modules -path '*/@puppeteer/browsers/package.json'); do \
+      case "$(node -p "require('$pkg').version")" in \
+        1.*) for f in "$(dirname "$pkg")"/lib/*/httpUtil.js; do \
+               sed -i 's/keepAlive = true/keepAlive = false/' "$f"; \
+               grep -q 'keepAlive = false' "$f"; \
+             done ;; \
+      esac; \
+    done; \
     rm -rf /opt/puppeteer; \
     puppeteer browsers install chrome; \
+    case "$(node -p "require('/usr/local/lib/node_modules/puppeteer/package.json').version")" in \
+      21.*) puppeteer browsers install chrome-headless-shell ;; \
+    esac; \
     npm cache clean --force; \
     chmod -R a+rX /opt/puppeteer
 

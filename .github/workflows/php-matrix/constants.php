@@ -70,9 +70,28 @@ const DEPLOYER_NODE_LATEST = '22';
 * LTS ended on 2026-08-31, so apt-get install fails there, and this image has
 * no PHP that would tie it to an older release.
 */
-const BUNDLING_NODE_VERSIONS = ['18', '20', '22'];
+const BUNDLING_NODE_VERSIONS = ['16', '18', '20', '22'];
 const BUNDLING_NODE_LATEST = '22';
 const BUNDLING_OS_RELEASE = 'bookworm';
+
+/*
+* Puppeteer version (npm version or dist-tag) installed globally per Node
+* version, in both the PHP + Node images (node/Dockerfile) and the bundling
+* image. An unpinned install takes whatever npm resolves on the day of the
+* build: on Node 16, 19 and 21 that became Puppeteer 25, which needs
+* Node >= 22.12 and fails there with ERR_REQUIRE_ESM or
+* "ReadableStream is not defined". 21 is the last major supporting Node 16;
+* 24 is the last supporting Node < 22.12. Every value in NODE_VERSIONS and
+* BUNDLING_NODE_VERSIONS needs an entry here.
+*/
+const PUPPETEER_VERSIONS = [
+    '16' => '21',
+    '18' => '24',
+    '19' => '24',
+    '20' => '24',
+    '21' => '24',
+    '22' => 'latest',
+];
 
 /*
 * Platforms the bundling image is built for, each on a native runner. Chrome

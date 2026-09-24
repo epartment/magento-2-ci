@@ -65,6 +65,7 @@ jobs:
           build-args: |
             NODE_VERSION=${{ matrix.node_version }}
             OS_RELEASE=${{ matrix.node_os_release }}
+            PUPPETEER_VERSION=${{ matrix.puppeteer_version }}
 
           outputs: type=image,name=${{ env.IMAGE }},push-by-digest=true,name-canonical=true,push=${{ github.ref == 'refs/heads/master' && !env.ACT }}
           cache-from: type=registry,ref=docker.io/epartment/gitlab-ci:bundling-node${{ matrix.node_version }}-${{ matrix.platform_pair }}-buildcache

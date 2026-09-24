@@ -143,6 +143,7 @@ jobs:
             PHP_VERSION=${{ matrix.php_version }}
             NODE_VERSION=${{ matrix.node_version }}
             OS_RELEASE=${{ matrix.node_os_release }}
+            PUPPETEER_VERSION=${{ matrix.puppeteer_version }}
           push: ${{ github.ref == 'refs/heads/master' && !env.ACT }}
           tags: docker.io/epartment/gitlab-ci:${{ matrix.php_version }}-node${{ matrix.node_version }}
           cache-from: type=registry,ref=docker.io/epartment/gitlab-ci:${{ matrix.php_version }}-node${{ matrix.node_version }}-buildcache
@@ -158,6 +159,7 @@ jobs:
             PHP_VERSION=${{ matrix.php_version }}
             NODE_VERSION=${{ matrix.node_version }}
             OS_RELEASE=${{ matrix.node_os_release }}
+            PUPPETEER_VERSION=${{ matrix.puppeteer_version }}
           push: ${{ github.ref == 'refs/heads/master' && !env.ACT }}
           tags: docker.io/epartment/gitlab-ci:latest-nodelatest
           cache-from: type=registry,ref=docker.io/epartment/gitlab-ci:latest-nodelatest-buildcache

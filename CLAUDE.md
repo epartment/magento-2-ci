@@ -74,15 +74,12 @@ you add a tool. It is the difference between a broken build here and a broken de
    `constants.php` feeds `node/Dockerfile` and `bundling/Dockerfile`; a Node version added to
    `NODE_VERSIONS` or `BUNDLING_NODE_VERSIONS` needs an entry there. An unpinned rebuild once put
    Puppeteer 25 (Node >= 22.12 only) on Node 16, 19 and 21 and broke every pipeline using those
-   images. The keep-alive patch for `@puppeteer/browsers` 1.x and the `chrome-headless-shell` install
-   for Puppeteer 21 exist for Node 16; see the comments in both Dockerfiles.
+   images. Pick a pin by testing it on that Node, not by reading its `engines` field: Puppeteer 24
+   runs on Node 16 although it declares `>=18`, while Puppeteer 21, which declares Node 16 support,
+   rejects the bare `puppeteer browsers install` that older client pipelines run and broke them.
+   Both Dockerfiles run that bare command during the build for this reason; keep it.
 
 ## Things that look like bugs but are not
-
-- **The `sed` on `@puppeteer/browsers/lib/*/httpUtil.js` in two Dockerfiles.** It switches off
-  keep-alive in version 1.x only, because otherwise `puppeteer browsers install` never exits on
-  Node 16, in the build and in client pipelines alike. It is deliberately duplicated: the two images
-  have separate build contexts.
 
 - **`deployer/Dockerfile` and `bundling/Dockerfile` duplicating Node setup.** They have different
   base distributions for a real reason (invariant 5). Merging them would break one of the two.

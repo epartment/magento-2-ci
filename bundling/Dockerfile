@@ -36,6 +36,11 @@ ENV DEBIAN_FRONTEND=noninteractive
 # tools the two jobs shell out to. Distribution Chromium is deliberately not
 # installed; the browser comes from Puppeteer below, so its version always
 # matches the Puppeteer that drives it.
+#
+# libx11-xcb1, libxss1 and libxtst6 are not needed by current Chrome. They are
+# here for the critical-CSS job, which runs the theme's own Puppeteer: themes
+# still pin Puppeteer 2.x, whose bundled Chromium (r7xxxxx) fails to start
+# with "libX11-xcb.so.1: cannot open shared object file" without them.
 RUN set -eux; \
     apt-get update; \
     apt-get install -y --no-install-recommends \
@@ -64,6 +69,7 @@ RUN set -eux; \
       libpango-1.0-0 \
       libstdc++6 \
       libx11-6 \
+      libx11-xcb1 \
       libxcb1 \
       libxcomposite1 \
       libxdamage1 \
@@ -71,6 +77,8 @@ RUN set -eux; \
       libxfixes3 \
       libxkbcommon0 \
       libxrandr2 \
+      libxss1 \
+      libxtst6 \
       xdg-utils; \
     apt-get clean; \
     rm -rf /var/lib/apt/lists/*

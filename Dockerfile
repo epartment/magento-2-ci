@@ -91,13 +91,16 @@ RUN if [ "$(printf "7.1\n${PHP_VERSION}" | sort -g | head -n1 | awk -F"." '{prin
 # PHP Extension Installer
 ADD https://github.com/mlocati/docker-php-extension-installer/releases/latest/download/install-php-extensions /usr/local/bin/
 
-# Install PHP Extensions required by Magento OS, Adobe Commerce, and the UCT (pcntl)
+# Install PHP Extensions required by Magento OS, Adobe Commerce, and the UCT (pcntl).
+# ftp is built into the official images up to PHP 8.1 only (the installer skips it there);
+# magento/framework requires it.
 RUN chmod +x /usr/local/bin/install-php-extensions && install-php-extensions \
     apcu \
     amqp \
     bcmath \
     calendar \
     exif \
+    ftp \
     gd \
     intl \
     imap \

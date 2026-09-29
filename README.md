@@ -117,7 +117,7 @@ adds the alias as a second tag when it joins the per-platform images, so nothing
 
 ### PHP with Composer 2 — `epartment/gitlab-ci:<tag>`
 
-General-purpose Magento CI image: PHP with APCu, AMQP, BCMath, Calendar, Exif, GD, Intl, Imagick
+General-purpose Magento CI image: PHP with APCu, AMQP, BCMath, Calendar, Exif, FTP, GD, Intl, Imagick
 (PHP < 8.3), IMAP, MySQLi, PCNTL, PDO MySQL, Redis, SOAP, Sockets, Sodium, XSL, ZIP and Mcrypt
 (PHP < 8.2), plus Composer 2. The `-node` variants add Node, NPM, Yarn, PhantomJS, Gulp, Grunt,
 Puppeteer, RequireJS, Terser and UglifyJS.
@@ -136,7 +136,9 @@ requires Puppeteer, runs the `puppeteer` binary and checks that its browser is i
 - `8.5`, `8.5-node20`, `8.5-node22` — PHP 8.5; only Node 20 and 22 are built for it
 
 PHP 8.4 and 8.5 have no Imagick and no Mcrypt, like 8.3. IMAP left PHP core in 8.4; the extension
-installer builds it from PECL there, so `imap` is still loaded.
+installer builds it from PECL there, so `imap` is still loaded. The official PHP images compile FTP
+in only up to 8.1, so the Dockerfile installs it explicitly; `magento/framework` requires `ext-ftp`,
+and without it `composer install` stops at the platform check.
 
 ### PHP with Composer 1 — `epartment/gitlab-ci-composer1:<tag>`
 

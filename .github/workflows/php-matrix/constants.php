@@ -7,7 +7,7 @@ const PHP_LATEST = '8.3';
 * If there is something changed in our Dockerfile and you want to build all versions then define it as follows:
 * const PHP_VERSIONS = ['7.1', '7.2', '7.3', '7.4', '8.0', '8.1', '8.2'];
 */
-const PHP_VERSIONS = ['7.1', '7.2', '7.3', '7.4', '8.0', '8.1', '8.2', '8.3'];
+const PHP_VERSIONS = ['7.1', '7.2', '7.3', '7.4', '8.0', '8.1', '8.2', '8.3', '8.4', '8.5'];
 const PHP_VERSIONS_OS_RELEASE = [
     '7.1' => 'buster',
     '7.2' => 'buster',
@@ -16,8 +16,26 @@ const PHP_VERSIONS_OS_RELEASE = [
     '8.0' => 'bullseye',
     '8.1' => 'bookworm',
     '8.2' => 'bookworm',
-    '8.3' => 'bookworm'
+    '8.3' => 'bookworm',
+    '8.4' => 'bookworm',
+    '8.5' => 'bookworm',
 ];
+
+/*
+* Node versions built per PHP version. A PHP version without an entry is
+* crossed with every value in NODE_VERSIONS. Give each newly added PHP version
+* an entry, so it does not get fresh tags on end-of-life Node versions.
+*/
+const PHP_NODE_VERSIONS = [
+    '8.4' => ['20', '22'],
+    '8.5' => ['20', '22'],
+];
+
+/*
+* PHP versions that get a gitlab-ci-composer1 variant. Magento 2.4.8 and later
+* need Composer 2, so a newly added PHP version is not listed here.
+*/
+const COMPOSER1_PHP_VERSIONS = ['7.1', '7.2', '7.3', '7.4', '8.0', '8.1', '8.2', '8.3'];
 const NODE_LATEST = '21';
 const NODE_VERSIONS = ['16', '18', '19', '20', '21', '22'];
 const NODE_VERSIONS_OS_RELEASE = [

@@ -104,8 +104,8 @@ which lists they cross-multiply:
 | Generator | Produces | Marks `latest` when |
 |---|---|---|
 | `php-generator.php` | one entry per PHP version | `PHP_LATEST` |
-| `node-generator.php` | PHP × Node | `PHP_LATEST` and `NODE_LATEST` |
-| `full-generator.php` | PHP × Node plus a `node_version: x` row for the Node-less variant | `PHP_LATEST` and `NODE_LATEST` |
+| `node-generator.php` | PHP × Node (`PHP_NODE_VERSIONS` narrows the Node list per PHP version) | `PHP_LATEST` and `NODE_LATEST` |
+| `full-generator.php` | `COMPOSER1_PHP_VERSIONS` × Node plus a `node_version: x` row for the Node-less variant | `PHP_LATEST` and `NODE_LATEST` |
 | `deployer-generator.php` | `DEPLOYER_VERSIONS` × `DEPLOYER_NODE_VERSIONS` | `DEPLOYER_LATEST` and `DEPLOYER_NODE_LATEST` |
 | `bundling-generator.php` | Node × platform (`build_matrix`), plus one row per Node (`matrix`) for the publish job | `BUNDLING_NODE_LATEST` |
 
@@ -132,10 +132,17 @@ requires Puppeteer, runs the `puppeteer` binary and checks that its browser is i
 - `latest-nodelatest` — newest PHP and Node
 - `8.3` — PHP 8.3, no Node
 - `8.3-node22` — PHP 8.3 with Node 22
+- `8.4`, `8.4-node20`, `8.4-node22` — PHP 8.4; only Node 20 and 22 are built for it
+- `8.5`, `8.5-node20`, `8.5-node22` — PHP 8.5; only Node 20 and 22 are built for it
+
+PHP 8.4 and 8.5 have no Imagick and no Mcrypt, like 8.3. IMAP left PHP core in 8.4; the extension
+installer builds it from PECL there, so `imap` is still loaded.
 
 ### PHP with Composer 1 — `epartment/gitlab-ci-composer1:<tag>`
 
-Identical, with Composer 1 in place of Composer 2. Same tag shapes.
+Identical, with Composer 1 in place of Composer 2. Same tag shapes, for PHP 7.1 to 8.3 only
+(`COMPOSER1_PHP_VERSIONS`): Magento 2.4.8 and later need Composer 2, so PHP 8.4 and newer get no
+Composer 1 variant.
 
 ### Deployer — `epartment/gitlab-ci:deployer-<deployer>-node<node>`
 
@@ -291,8 +298,9 @@ openssl rand -hex 32 > .trigger
 ## Conventions
 
 - **`constants.php` is the only place versions are declared.** Adding a PHP or Node version means
-  appending to the relevant array and adding its OS release to the matching map. Nothing else needs
-  to change.
+  appending to the relevant array and adding its OS release to the matching map. A new PHP version
+  also gets a `PHP_NODE_VERSIONS` entry listing the supported Node versions it is built with, and is
+  not added to `COMPOSER1_PHP_VERSIONS`. Nothing else needs to change.
 - **Branch off `master`; never push a version change straight to it.** A merge publishes.
 - **Every image ends with a smoke test.** `deployer/Dockerfile` and `bundling/Dockerfile` finish with
   a `RUN` that executes the tools they claim to ship. A broken copy or symlink then fails the build
@@ -377,7 +385,21 @@ openssl rand -hex 32 > .trigger
   while the other half keeps working — a failure that only shows up as tags quietly falling behind.
 - *Suggested fix:* Standardise on the token pair and delete the other.
 
-**M4. PhantomJS is still installed in the PHP-Node image** — `node/Dockerfile:20`
+**M4. `python` and `python3` are missing from every bookworm-based PHP image** — `Dockerfile:87`–`:89`
+
+- *What:* The "PHP >= 7.1" step installs `python3 python3-pip python2` in one `apt-get install`.
+  Bookworm has no `python2`, so apt installs nothing, and because the `RUN` has no `set -e` the step
+  still creates `/usr/bin/python -> python3` and `/usr/bin/pip -> pip3` and succeeds. PHP 8.1 to
+  8.5 therefore ship dangling symlinks: `python3 --version` returns `not found` in the published
+  `8.3` image and in the new `8.4` and `8.5` builds alike.
+- *Why it matters:* node-gyp needs Python to compile native npm packages, so a `-node` tag on PHP
+  8.1+ cannot build a package that has no prebuilt binary for the platform (for example `node-sass`
+  on a newer Node). The failure shows up in a client pipeline, not here.
+- *Suggested fix:* Install `python2` only on releases that ship it (buster, bullseye), add `set -eux`
+  to the step, and add `python3 --version` to a smoke test at the end of the root `Dockerfile`. This
+  rebuilds every PHP tag, so do it as its own change.
+
+**M5. PhantomJS is still installed in the PHP-Node image** — `node/Dockerfile:20`
 
 - *What:* The image copies a PhantomJS binary from `rollupdev/phantomjs:latest`, an unpinned
   third-party image.

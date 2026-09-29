@@ -49,7 +49,9 @@ you add a tool. It is the difference between a broken build here and a broken de
 
 1. **`constants.php` is the only place a version is declared.** All five matrix generators read it.
    Adding a PHP or Node version means appending to the array and adding its OS release to the
-   matching map — never hardcoding a version in a workflow or Dockerfile.
+   matching map — never hardcoding a version in a workflow or Dockerfile. A new PHP version also
+   needs a `PHP_NODE_VERSIONS` entry (otherwise it is crossed with every Node version, EOL ones
+   included) and stays out of `COMPOSER1_PHP_VERSIONS`.
 
 2. **The PHP images are a chain, not three independent builds.** `Dockerfile` →`node/Dockerfile` →
    `composer1/Dockerfile`, joined by the `ENV_SOURCE_IMAGE` build arg and by `needs:` in
